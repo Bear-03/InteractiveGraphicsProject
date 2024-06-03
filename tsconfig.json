@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        // Strict Checks
+        "strict": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        // Linter Checks
+        "noImplicitReturns": true,
+        "noImplicitOverride": true,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+    }
+}
