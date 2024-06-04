@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "bundler",
         // Strict Checks
         "strict": true,
         "noPropertyAccessFromIndexSignature": true,
@@ -14,5 +16,9 @@
         "noUnusedParameters": true,
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
+        "lib": [ "ES2015", "DOM" ], // Gets rid of iterable type problem
+        "types": [
+            "vite-plugin-glsl/ext"
+        ]
     }
 }
