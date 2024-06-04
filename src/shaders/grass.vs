@@ -5,17 +5,18 @@
 
 // Multiplicator of the values outputted by the noise pattern,
 // i.e. how much difference between hills and valleys of grass
-#define WIND_STRENGTH 4.0
+#define WIND_STRENGTH 2.0
 // How fast the noise pattern moves
 #define WIND_SPEED 0.5
  // In which direction the pattern moves
 #define WIND_DIRECTION normalize(vec2(-1.0, 1.0))
 // How zoomed in the pattern is
-#define WIND_DENSITY 0.5
+#define WIND_DENSITY 0.3
 
 uniform float u_time;
 
 varying float v_height;
+varying float v_offset_angle;
 
 float worley(vec2 position);
 
@@ -35,10 +36,12 @@ void main() {
     v_height = position.z;
 
     float offset_angle = v_height * WIND_STRENGTH * worley(WIND_DENSITY * position.xy + WIND_SPEED * u_time * WIND_DIRECTION);
+    v_offset_angle = offset_angle;
     // We could just add the offset to the vertex position
     // but that results in stretching
     // old_pos = vec3(0, 0, v_height)
     vec3 offset_vec = rotate_towards(vec3(0, 0, v_height), vec3(WIND_DIRECTION, 0), offset_angle);
+
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position + offset_vec, 1.0);
 }

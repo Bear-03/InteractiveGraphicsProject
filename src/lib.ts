@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+export type Range<T> = { min: T, max: T };
+
 export const debugMode = true;
 export const behaviours: Behaviour[] = []
 

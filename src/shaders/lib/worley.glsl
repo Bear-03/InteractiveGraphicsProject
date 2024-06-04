@@ -8,7 +8,7 @@ vec2 rand2(vec2 position) {
     )) * 231.23);
 }
 
-// Generates a noise value for a given position
+// Generates a noise value [0, 1] for a given position
 float worley(vec2 position) {
     float min_dist = 1.0; // Start as max possible dist
 
