@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Grass } from "./floor";
+import { Grass } from "./grass";
 import { debugMode, instantiate, behaviours } from "./lib";
 import { FlyControls } from 'three/addons/controls/FlyControls.js';
 import { Cube } from "./cube";
@@ -21,7 +21,7 @@ function start(): void {
     scene.background = new THREE.Color(SKY_COLOR);
 
     camera.position.y = 2;
-    camera.position.z = Grass.SIZE / 2 + 1.4;
+    camera.position.z = Grass.SIZE / 2 + 1.2;
     camera.rotation.x = -0.3;
 
     const light = new THREE.DirectionalLight(0xffffff, 1);

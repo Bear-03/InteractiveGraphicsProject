@@ -12,7 +12,7 @@ export class Grass extends THREE.Mesh implements Behaviour {
     public static SIZE = 10;
     private static GRASS_DENSITY = 100; // How many blades per m^2
 
-    private static BLADE_SIZE = new THREE.Vector2(0.2, 0.8);
+    private static BLADE_SIZE = new THREE.Vector2(0.2, 0.5);
     private static BLADE_HEIGHT_MULTIPLIER_DEVIATION = 0.1;
     private static BLADE_ROTATION_DEVIATION = 0.2; // +- how much to add to the rotation on each axis
 
