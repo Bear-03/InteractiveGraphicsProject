@@ -18,3 +18,7 @@ export function instantiate(obj: THREE.Object3D, parent: THREE.Object3D): void {
 
     parent.add(obj);
 }
+
+export function joinShaders(src: string[]): string {
+    return src.join("\n// APPENDED FILE\n")
+}

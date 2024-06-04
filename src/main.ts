@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Floor } from "./floor";
+import { Grass } from "./floor";
 import { debugMode, instantiate, behaviours } from "./lib";
 import { FlyControls } from 'three/addons/controls/FlyControls.js';
 import { Cube } from "./cube";
@@ -20,9 +20,9 @@ const SKY_COLOR = 0x88ddda;
 function start(): void {
     scene.background = new THREE.Color(SKY_COLOR);
 
-    camera.position.y = 1.5;
-    camera.position.z = Floor.SIZE / 2 + 1.2;
-    camera.rotation.x = -0.2;
+    camera.position.y = 2;
+    camera.position.z = Grass.SIZE / 2 + 1.4;
+    camera.rotation.x = -0.3;
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(-10, 10, 10);
@@ -40,7 +40,7 @@ function start(): void {
         controls.dragToLook = true;
     }
 
-    instantiate(new Floor(), scene);
+    instantiate(new Grass(), scene);
     const cube = new Cube();
     cube.position.set(3, Cube.SIZE / 2, -3);
     instantiate(cube, scene);
