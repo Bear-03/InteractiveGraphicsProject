@@ -46,14 +46,13 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 }
 
 // Returns the direction and amount the vertex should move because of wind
-vec3 calculate_wind_influence(vec3 vertex_height_vec) {
+vec3 calculate_wind_influence() {
     float influence_angle = v_height * WIND_STRENGTH * worley(WIND_DENSITY * position.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
-    vec3 new_pos = rotate_towards(vertex_height_vec, vec3(WIND_DIRECTION, 0), min(influence_angle, PI / 2.0));
-
-    return new_pos - vertex_height_vec;
+    vec3 rotated = rotate_towards(UP, vec3(WIND_DIRECTION, 0), min(influence_angle, PI / 2.0));
+    return rotated - UP;
 }
 
-vec3 calculate_spatial_influence(vec3 vertex_height_vec) {
+vec3 calculate_spatial_influence() {
     vec3 influence = vec3(0.0);
 
     for (int i = 0; i < MAX_SPATIALS; i++) {
@@ -72,8 +71,8 @@ vec3 calculate_spatial_influence(vec3 vertex_height_vec) {
         float t = clamp(map_range(length(distance), spatial.radius, MAX_SPATIAL_INFLUENCE_DISTANCE, 1.0, 0.0), 0.0, 1.0);
         angle = smoothstep(0.0, MAX_SPATIAL_INFLUENCE_ANGLE, t);
 
-        vec3 new_pos = rotate_towards(vertex_height_vec, vec3(influence_dir, 0.0), angle);
-        influence += new_pos - vertex_height_vec;
+        vec3 rotated = rotate_towards(UP, vec3(influence_dir, 0.0), angle);
+        influence += rotated - UP;
     }
 
     return SPATIAL_INFLUENCE_STRENGTH * influence;
@@ -82,18 +81,14 @@ vec3 calculate_spatial_influence(vec3 vertex_height_vec) {
 void main() {
     v_height = position.z;
 
-    // NOTE: This is only working because the shape is a triangle and the only
-    // vertex with non-zero height is at (x, y) = (0, 0)
-    vec3 vertex_height_vec = vec3(0.0, 0.0, v_height);
-
     // We could just add the offset to the vertex position
     // but that results in stretching
-    // old_pos = vec3(0, 0, v_height)
 
     // Offset angles
     vec3 influence;
-    influence += calculate_wind_influence(vertex_height_vec);
-    influence += calculate_spatial_influence(vertex_height_vec);
+    influence += calculate_wind_influence();
+    influence += calculate_spatial_influence();
+    influence *= v_height;
 
     v_influence_magnitude = length(influence);
 
