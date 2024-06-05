@@ -16,14 +16,4 @@ export class Sphere extends THREE.Mesh implements Spatial {
 
         this.radius = radius;
     }
-
-    bottom(): THREE.Vector3 {
-        const center = this.position.clone();
-        center.z -= this.radius;
-        return center
-    }
-
-    influenceRadius(): number {
-        return this.radius;
-    }
 }

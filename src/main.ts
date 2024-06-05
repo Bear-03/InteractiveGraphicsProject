@@ -52,9 +52,11 @@ function start(): void {
         controls.dragToLook = true;
     }
 
-    instantiate(new Grass(), scene);
+    const grass = new Grass();
+    instantiate(grass, scene);
+
     const sphere = new Sphere(1);
-    sphere.position.set(2, sphere.radius, -2);
+    sphere.position.set(0, sphere.radius, 0);
     instantiate(sphere, scene);
 }
 
