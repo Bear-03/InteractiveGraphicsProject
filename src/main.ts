@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { Grass } from "./grass";
 import { debugMode, instantiate, behaviours } from "./lib";
 import { FlyControls } from 'three/addons/controls/FlyControls.js';
-import { Cube } from "./cube";
+import { Sphere } from "./sphere";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -53,9 +53,9 @@ function start(): void {
     }
 
     instantiate(new Grass(), scene);
-    const cube = new Cube();
-    cube.position.set(3, Cube.SIZE / 2, -3);
-    instantiate(cube, scene);
+    const sphere = new Sphere(1);
+    sphere.position.set(2, sphere.radius, -2);
+    instantiate(sphere, scene);
 }
 
 function update(delta: number): void {

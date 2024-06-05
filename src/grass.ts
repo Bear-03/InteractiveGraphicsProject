@@ -1,12 +1,25 @@
 import * as THREE from "three";
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import { Behaviour, Range, instantiate, joinShaders } from "./lib";
+import { Behaviour, Range, instantiate, joinShaders, spatials } from "./lib";
 import worley_s from "./shaders/lib/worley.glsl";
 import grass_vs from "./shaders/grass.vs";
 import grass_fs from "./shaders/grass.fs";
 
 const GRASS_COLOR = 0x3d8b38;
 const GRASS_TIP_COLOR = 0x7ec53c;
+
+type SpatialShaderRepr = {
+    bottom: THREE.Vector3,
+    influenceRadius: number
+}
+
+type GrassShaderUniforms = {
+    u_colorBottom: { value: THREE.Color },
+    u_colorTop: { value: THREE.Color },
+    u_time: { value: number },
+    u_spatials: { value: SpatialShaderRepr[] },
+    u_spatials_len: { value: number },
+}
 
 export class Grass extends THREE.Mesh implements Behaviour {
     public static SIZE = 15;
@@ -21,10 +34,12 @@ export class Grass extends THREE.Mesh implements Behaviour {
         max: new THREE.Vector3(Math.PI / 4, 0.2, Math.PI)
     };
 
-    private static shaderUniforms = {
+    private static shaderUniforms: GrassShaderUniforms = {
         u_colorBottom: { value: new THREE.Color(GRASS_COLOR) },
         u_colorTop: { value: new THREE.Color(GRASS_TIP_COLOR) },
         u_time: { value: 0 },
+        u_spatials: { value: [] },
+        u_spatials_len: { value: 0 },
     };
 
     constructor() {
@@ -42,6 +57,11 @@ export class Grass extends THREE.Mesh implements Behaviour {
 
     update(delta: number): void {
         Grass.shaderUniforms.u_time.value += delta;
+        Grass.shaderUniforms.u_spatials.value = spatials.map((x) => ({
+            bottom: x.bottom(),
+            influenceRadius: x.influenceRadius()
+        }));
+        Grass.shaderUniforms.u_spatials_len.value = spatials.length;
     }
 
     populateGrass() {
