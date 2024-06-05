@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { Behaviour, Range, Spatial, instantiate, joinShaders, spatials } from "./lib";
+import compare_s from "./shaders/lib/compare.glsl";
 import map_range_s from "./shaders/lib/map_range.glsl";
 import worley_s from "./shaders/lib/worley.glsl";
 import grass_vs from "./shaders/grass.vs";
@@ -89,7 +90,7 @@ export class Grass extends THREE.Mesh implements Behaviour {
             BufferGeometryUtils.mergeGeometries(blades),
             new THREE.ShaderMaterial({
                 uniforms: this.shaderUniforms,
-                vertexShader: joinShaders([map_range_s, worley_s, grass_vs]),
+                vertexShader: joinShaders([compare_s, map_range_s, worley_s, grass_vs]),
                 fragmentShader: joinShaders([worley_s, grass_fs]),
                 side: THREE.DoubleSide,
                 transparent: true
@@ -101,13 +102,21 @@ export class Grass extends THREE.Mesh implements Behaviour {
         const heightMultiplier = 1 + THREE.MathUtils.randFloat(-Grass.BLADE_HEIGHT_MULTIPLIER_DEVIATION.min, Grass.BLADE_HEIGHT_MULTIPLIER_DEVIATION.max);
 
         const geom = new THREE.BufferGeometry();
+
         const vertices = new Float32Array([
             // First triangle
             Grass.BLADE_SIZE.x / 2, 0, 0,
             0, 0, Grass.BLADE_SIZE.y * heightMultiplier,
             -Grass.BLADE_SIZE.x / 2, 0, 0,
         ]);
+        const uvs = new Float32Array([
+            0, 0,
+            0.5, 1,
+            1, 0,
+        ])
+
         geom.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+        geom.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
 
         geom.rotateX(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.x, Grass.BLADE_ROTATION.max.x));
         geom.rotateY(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.y, Grass.BLADE_ROTATION.max.y));
