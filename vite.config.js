@@ -13,4 +13,10 @@ export default {
             typescript: true,
         })
     ],
+    server: {
+        watch: {
+            usePolling: true,
+        }
+    },
+
 }

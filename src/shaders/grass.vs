@@ -12,13 +12,13 @@
 #define WIND_DIRECTION normalize(vec2(1.0, 1.0))
 // How zoomed in the pattern is
 #define WIND_DENSITY 0.3
+// How much wind influences the grass when there is also spatial influence
+#define WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE 0.1
 
 // How much spatial influence moves the blades
 #define SPATIAL_INFLUENCE_STRENGTH 1.0
-// How much wind influences the grass when there is also spatial influence
-#define WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE 0.2
 // How far spatial influence goes
-#define MAX_SPATIAL_INFLUENCE_DISTANCE 1.2
+#define SPATIAL_INFLUENCE_MAX_DISTANCE 1.2
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
 
@@ -27,6 +27,11 @@
 struct Spatial {
     vec3 position;
     float radius;
+};
+
+struct Influence {
+    vec3 blade_direction;
+    vec3 displacement; // |blade_direction - UP|
 };
 
 uniform float u_time;
@@ -53,13 +58,25 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 }
 
 // Returns the direction and amount the vertex should move because of wind
-vec3 calculate_wind_influence() {
+Influence wind_influence(Influence influence) {
+    // Wind should not be applied if the grass is suffering spatial influence
+    // because grass that is "stepped on" does not move too much
+    float wind_multiplier = 1.0;
+    if (is_eq_approx(length(influence.displacement), 0.0)) {
+        wind_multiplier = 1.0;
+    } else {
+        wind_multiplier = WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE / length(influence.displacement);
+    }
+
     float angle = v_height * WIND_STRENGTH * worley(WIND_DENSITY * position.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
-    return rotate_towards(UP, vec3(WIND_DIRECTION, 0), min(angle, MAX_TURN_ANGLE));
+    vec3 new_blade_direction = rotate_towards(UP, vec3(WIND_DIRECTION, 0), min(angle, MAX_TURN_ANGLE));
+    vec3 blade_direction = normalize(influence.blade_direction + new_blade_direction);
+    return Influence(blade_direction, blade_direction - UP);
 }
 
-vec3 calculate_spatial_influence() {
-    vec3 new_up = vec3(0.0);
+
+Influence spatial_influence(Influence influence) {
+    vec3 new_blade_direction = vec3(0.0);
 
     for (int i = 0; i < MAX_SPATIALS; i++) {
         if (i >= u_spatials_len) {
@@ -74,13 +91,14 @@ vec3 calculate_spatial_influence() {
 
         float angle;
         // Cases go from furthest to closest
-        float t = clamp(v_height * SPATIAL_INFLUENCE_STRENGTH * map_range(length(distance), spatial.radius, MAX_SPATIAL_INFLUENCE_DISTANCE, 1.0, 0.0), 0.0, 1.0);
+        float t = clamp(v_height * SPATIAL_INFLUENCE_STRENGTH * map_range(length(distance), spatial.radius, SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), 0.0, 1.0);
         angle = mix(0.0, MAX_TURN_ANGLE, t);
 
-        new_up += rotate_towards(UP, vec3(influence_dir, 0.0), angle);
+        new_blade_direction += rotate_towards(UP, vec3(influence_dir, 0.0), angle);
     }
 
-    return normalize(new_up);
+    vec3 blade_direction = normalize(influence.blade_direction + new_blade_direction);
+    return Influence(blade_direction, blade_direction - UP);
 }
 
 void main() {
@@ -89,24 +107,10 @@ void main() {
     // We could just add the offset to the vertex position
     // but that results in stretching
 
-    vec3 new_up = UP;
+    Influence influence = Influence(UP, vec3(0.0)); // Start with no influence at all
+    influence = spatial_influence(influence);
+    influence = wind_influence(influence);
+    v_influence_magnitude = length(influence.displacement);
 
-    new_up += calculate_spatial_influence();
-    new_up = normalize(new_up);
-    vec3 displacement = new_up - UP;
-
-    float wind_multiplier = 1.0;
-    if (is_eq_approx(length(displacement), 0.0)) {
-        wind_multiplier = 1.0;
-    } else {
-        wind_multiplier = WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE / length(displacement);
-    }
-
-    new_up += wind_multiplier * calculate_wind_influence();
-    new_up = normalize(new_up);
-    displacement = new_up - UP;
-
-    v_influence_magnitude = length(displacement);
-
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + displacement, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + influence.displacement, 1.0);
 }

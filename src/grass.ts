@@ -93,7 +93,7 @@ export class Grass extends THREE.Mesh implements Behaviour {
                 vertexShader: joinShaders([compare_s, map_range_s, worley_s, grass_vs]),
                 fragmentShader: joinShaders([worley_s, grass_fs]),
                 side: THREE.DoubleSide,
-                transparent: true
+                transparent: true,
             })
         ), this);
     }
