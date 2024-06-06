@@ -86,7 +86,7 @@ Influence spatial_influence(Influence influence) {
         Spatial spatial = u_spatials[i];
         // Spatial position needs to have the y and z swapped because
         // of the change in coordinate system from threejs to webgl
-        vec3 distance = position - spatial.position.xzy;
+        vec3 distance = position - spatial.position;
         vec2 influence_dir = distance.xy;
 
         float angle;

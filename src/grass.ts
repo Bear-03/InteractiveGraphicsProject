@@ -51,7 +51,6 @@ export class Grass extends THREE.Mesh implements Behaviour {
         };
 
         this.receiveShadow = true;
-        this.rotation.x = - Math.PI / 2;
         this.populateGrass();
     }
 

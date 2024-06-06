@@ -10,8 +10,8 @@ export class Camera extends THREE.PerspectiveCamera implements Behaviour {
     constructor() {
         super(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-        this.position.y = 6;
-        this.position.z = Grass.SIZE / 2 + 0.5;
+        this.position.z = 6;
+        this.position.y = - Grass.SIZE / 2 - 0.5;
 
         this.controls = new OrbitControls(this, renderer.domElement);
         this.controls.listenToKeyEvents(window);

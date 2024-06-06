@@ -5,6 +5,8 @@ import { Sphere } from "./sphere";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { Camera } from "./camera";
 
+THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
+
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
 export const scene = new THREE.Scene();
 export const camera = new Camera();
@@ -32,7 +34,7 @@ function start(): void {
     instantiate(new THREE.AmbientLight(0xffffff, 0.5), scene);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(-10, 10, 10);
+    light.position.set(-10, -10, 10);
     light.castShadow = true;
     instantiate(light, scene);
 
@@ -45,7 +47,7 @@ function start(): void {
     instantiate(grass, scene);
 
     const sphere = new Sphere(1);
-    sphere.position.set(0, sphere.radius, 0);
+    sphere.position.set(2, 2, sphere.radius);
     instantiate(sphere, scene);
 }
 
