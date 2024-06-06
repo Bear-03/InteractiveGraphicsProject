@@ -29,6 +29,7 @@ document.body.appendChild(renderer.domElement);
 const SKY_COLOR = 0x88ddda;
 
 function start(): void {
+    instantiate(camera, scene);
     scene.background = new THREE.Color(SKY_COLOR);
 
     instantiate(new THREE.AmbientLight(0xffffff, 0.5), scene);

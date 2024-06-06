@@ -19,6 +19,10 @@ export class Camera extends THREE.PerspectiveCamera implements Behaviour {
         this.controls.maxPolarAngle = Math.PI / 2;
     }
 
+    getLookDirection(): THREE.Vector3 {
+        return new THREE.Vector3(0, 0, -1).applyEuler(this.rotation);
+    }
+
     update(delta: number): void {
         this.controls.update(delta);
     }

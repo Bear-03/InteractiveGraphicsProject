@@ -27,10 +27,10 @@ export class Grass extends THREE.Mesh implements Behaviour {
     private static BLADE_SIZE = new THREE.Vector2(0.2, 0.5);
     private static BLADE_HEIGHT_MULTIPLIER_DEVIATION: Range<number> = { min: -0.5, max: 0 };
     // +- how much to add to the rotation on each axis
-    private static BLADE_ROTATION: Range<THREE.Vector3> = {
+    /*private static BLADE_ROTATION: Range<THREE.Vector3> = {
         min: new THREE.Vector3(-Math.PI / 4, -0.2, 0),
         max: new THREE.Vector3(Math.PI / 4, 0.2, Math.PI)
-    };
+    };*/
 
     public shaderUniforms: GrassShaderUniforms;
 
@@ -79,9 +79,10 @@ export class Grass extends THREE.Mesh implements Behaviour {
         const blades = new Array(bladeCount);
 
         for (let i = 0; i < bladeCount; i++) {
-            blades[i] = this.createBladeMesh(new THREE.Vector2(
+            blades[i] = this.createBladeMesh(new THREE.Vector3(
                 THREE.MathUtils.randFloatSpread(Grass.SIZE - Grass.MARGIN),
                 THREE.MathUtils.randFloatSpread(Grass.SIZE - Grass.MARGIN),
+                0
             ));
         }
 
@@ -97,13 +98,12 @@ export class Grass extends THREE.Mesh implements Behaviour {
         ), this);
     }
 
-    createBladeMesh(position: THREE.Vector2) {
+    createBladeMesh(position: THREE.Vector3) {
         const heightMultiplier = 1 + THREE.MathUtils.randFloat(-Grass.BLADE_HEIGHT_MULTIPLIER_DEVIATION.min, Grass.BLADE_HEIGHT_MULTIPLIER_DEVIATION.max);
 
         const geom = new THREE.BufferGeometry();
 
         const vertices = new Float32Array([
-            // First triangle
             Grass.BLADE_SIZE.x / 2, 0, 0,
             0, 0, Grass.BLADE_SIZE.y * heightMultiplier,
             -Grass.BLADE_SIZE.x / 2, 0, 0,
@@ -112,14 +112,25 @@ export class Grass extends THREE.Mesh implements Behaviour {
             0, 0,
             0.5, 1,
             1, 0,
-        ])
+        ]);
+
+        const x = position.x;
+        const y = position.y;
+        const z = position.z;
+        const blade_origin = new Float32Array([
+            x, y, z,
+            x, y, z,
+            x, y, z,
+        ]);
 
         geom.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
         geom.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+        geom.setAttribute("a_blade_origin", new THREE.BufferAttribute(blade_origin, 3));
 
-        geom.rotateX(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.x, Grass.BLADE_ROTATION.max.x));
+        /*geom.rotateX(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.x, Grass.BLADE_ROTATION.max.x));
         geom.rotateY(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.y, Grass.BLADE_ROTATION.max.y));
         geom.rotateZ(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.z, Grass.BLADE_ROTATION.max.z));
+        */
         geom.translate(position.x, position.y, 0);
 
         geom.computeVertexNormals();

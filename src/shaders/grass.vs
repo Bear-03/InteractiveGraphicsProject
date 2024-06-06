@@ -34,12 +34,16 @@ struct Influence {
     vec3 displacement; // |blade_direction - UP|
 };
 
+attribute vec3 a_blade_origin;
+
 uniform float u_time;
 uniform Spatial u_spatials[MAX_SPATIALS];
 uniform int u_spatials_len;
 
 varying float v_height;
 varying float v_influence_magnitude;
+varying vec3 v_blade_origin;
+varying vec3 v_position;
 
 float worley(vec2 position);
 float map_range(float value, float in_min, float in_max, float out_min, float out_max);
@@ -101,8 +105,34 @@ Influence spatial_influence(Influence influence) {
     return Influence(blade_direction, blade_direction - UP);
 }
 
+// Explanation: https://www.math3d.org/LcSay7BqG
+vec3 facing_camera_displacement() {
+    // We wanna treat all pixels equal, regardless of height
+    vec3 origin_relative_position = position - a_blade_origin;
+    // We remove the z because we don't care about facing the camera height-wise either, it will look weird
+    vec2 camera_dir_flat = normalize(cameraPosition - position).xy;
+
+    // For the blade to look in the direction of the camera, the edges have to be
+    // perpendicular to both the cam vector and the up vector
+    // There are two possible perpendicular vectors, in order to rotate
+    // each side of the leaf has to get a different one
+    float side = uv.x < 0.5 ? 1.0 : -1.0;
+    // NOTE: This vector will always have z = 0 so we get xy
+    vec2 new_dir = side * cross(vec3(camera_dir_flat, 0.0), UP).xy;
+
+    vec3 new_origin_relative_position = vec3(length(origin_relative_position.xy) * new_dir, origin_relative_position.z);
+
+    // We keep the height from the original position, we care about rotation of the vertex
+
+    return new_origin_relative_position - origin_relative_position;
+}
+
 void main() {
     v_height = uv.y;
+    v_blade_origin = a_blade_origin;
+    v_position = position;
+
+    vec3 adjusted_position = position + facing_camera_displacement();
 
     // We could just add the offset to the vertex position
     // but that results in stretching
@@ -112,5 +142,5 @@ void main() {
     influence = wind_influence(influence);
     v_influence_magnitude = length(influence.displacement);
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + influence.displacement, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(adjusted_position + influence.displacement, 1.0);
 }
