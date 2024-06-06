@@ -47,7 +47,8 @@ varying vec3 v_position;
 
 float worley(vec2 position);
 float map_range(float value, float in_min, float in_max, float out_min, float out_max);
-bool is_eq_approx(float a, float b);
+bool equal_approx(vec2 a, vec2 b);
+bool equal_approx(float a, float b);
 
 // Source: https://math.stackexchange.com/a/4306149
 vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
@@ -66,7 +67,7 @@ Influence wind_influence(Influence influence) {
     // Wind should not be applied if the grass is suffering spatial influence
     // because grass that is "stepped on" does not move too much
     float wind_multiplier = 1.0;
-    if (is_eq_approx(length(influence.displacement), 0.0)) {
+    if (equal_approx(length(influence.displacement), 0.0)) {
         wind_multiplier = 1.0;
     } else {
         wind_multiplier = WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE / length(influence.displacement);
@@ -105,26 +106,27 @@ Influence spatial_influence(Influence influence) {
     return Influence(blade_direction, blade_direction - UP);
 }
 
-// Explanation: https://www.math3d.org/LcSay7BqG
+// Explanation: https://www.math3d.org/EWP78UwMc
 vec3 facing_camera_displacement() {
     // We wanna treat all pixels equal, regardless of height
     vec3 origin_relative_position = position - a_blade_origin;
     // We remove the z because we don't care about facing the camera height-wise either, it will look weird
-    vec2 camera_dir_flat = normalize(cameraPosition - position).xy;
+    vec2 camera_dir_flat = normalize(cameraPosition - a_blade_origin).xy;
 
     // For the blade to look in the direction of the camera, the edges have to be
     // perpendicular to both the cam vector and the up vector
+
     // There are two possible perpendicular vectors, in order to rotate
     // each side of the leaf has to get a different one
     float side = uv.x < 0.5 ? 1.0 : -1.0;
-    // NOTE: This vector will always have z = 0 so we get xy
-    vec2 new_dir = side * cross(vec3(camera_dir_flat, 0.0), UP).xy;
+    // This vector will always have z = 0 so we keep only xy
+    vec2 new_dir = side * normalize(cross(vec3(camera_dir_flat, 0.0), UP).xy);
 
+    // We only want to rotate sideways, so z is preserved
     vec3 new_origin_relative_position = vec3(length(origin_relative_position.xy) * new_dir, origin_relative_position.z);
 
-    // We keep the height from the original position, we care about rotation of the vertex
-
-    return new_origin_relative_position - origin_relative_position;
+    vec3 displacement = new_origin_relative_position - origin_relative_position;
+    return displacement;
 }
 
 void main() {
@@ -138,8 +140,8 @@ void main() {
     // but that results in stretching
 
     Influence influence = Influence(UP, vec3(0.0)); // Start with no influence at all
-    influence = spatial_influence(influence);
-    influence = wind_influence(influence);
+    //influence = spatial_influence(influence);
+    //influence = wind_influence(influence);
     v_influence_magnitude = length(influence.displacement);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(adjusted_position + influence.displacement, 1.0);
