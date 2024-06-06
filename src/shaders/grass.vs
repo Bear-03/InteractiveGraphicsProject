@@ -16,9 +16,9 @@
 // How much spatial influence moves the blades
 #define SPATIAL_INFLUENCE_STRENGTH 1.0
 // How much wind influences the grass when there is also spatial influence
-#define WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE 0.5
+#define WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE 0.2
 // How far spatial influence goes
-#define MAX_SPATIAL_INFLUENCE_DISTANCE 1.5
+#define MAX_SPATIAL_INFLUENCE_DISTANCE 1.2
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
 
@@ -99,7 +99,7 @@ void main() {
     if (is_eq_approx(length(displacement), 0.0)) {
         wind_multiplier = 1.0;
     } else {
-        wind_multiplier = WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE * length(displacement);
+        wind_multiplier = WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE / length(displacement);
     }
 
     new_up += wind_multiplier * calculate_wind_influence();
