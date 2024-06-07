@@ -1,20 +1,26 @@
 import * as THREE from "three";
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import { Behaviour, Range, Spatial, instantiate, joinShaders, spatials } from "./lib";
+import { Behaviour, Range, instantiate, joinShaders, spatials } from "./lib";
 import compare_s from "./shaders/lib/compare.glsl";
 import map_range_s from "./shaders/lib/map_range.glsl";
-import worley_s from "./shaders/lib/worley.glsl";
+import random_s from "./shaders/lib/random.glsl";
 import grass_vs from "./shaders/grass.vs";
 import grass_fs from "./shaders/grass.fs";
 
-const GRASS_COLOR = 0x3d8b38;
+const GROUND_COLOR = 0x5f5033;
+const GRASS_BASE_COLOR = 0x3d8b38;
 const GRASS_TIP_COLOR = 0x7ec53c;
+
+type SpatialShaderRepr = {
+    bottom: THREE.Vector3,
+    radius: number,
+}
 
 type GrassShaderUniforms = {
     u_colorBottom: { value: THREE.Color },
     u_colorTop: { value: THREE.Color },
     u_time: { value: number },
-    u_spatials: { value: Spatial[] },
+    u_spatials: { value: SpatialShaderRepr[] },
     u_spatials_len: { value: number },
 }
 
@@ -26,6 +32,11 @@ export class Grass extends THREE.Mesh implements Behaviour {
 
     private static BLADE_SIZE = new THREE.Vector2(0.2, 0.5);
     private static BLADE_HEIGHT_MULTIPLIER_DEVIATION: Range<number> = { min: -0.5, max: 0 };
+    // +- how much to add to the rotation on each axis
+    private static BLADE_ROTATION: Range<THREE.Vector3> = {
+        min: new THREE.Vector3(-Math.PI / 4, -0.2, 0),
+        max: new THREE.Vector3(Math.PI / 4, 0.2, Math.PI)
+    };
 
     public shaderUniforms: GrassShaderUniforms;
 
@@ -33,12 +44,12 @@ export class Grass extends THREE.Mesh implements Behaviour {
         super(
             new THREE.PlaneGeometry(Grass.SIZE, Grass.SIZE),
             new THREE.MeshStandardMaterial({
-                color: GRASS_COLOR,
+                color: GROUND_COLOR,
             })
         )
 
         this.shaderUniforms = {
-            u_colorBottom: { value: new THREE.Color(GRASS_COLOR) },
+            u_colorBottom: { value: new THREE.Color(GRASS_BASE_COLOR) },
             u_colorTop: { value: new THREE.Color(GRASS_TIP_COLOR) },
             u_time: { value: 0 },
             u_spatials: { value: this.getSpatialsForShader() },
@@ -50,14 +61,18 @@ export class Grass extends THREE.Mesh implements Behaviour {
     }
 
     // Extends the spatials array with dummy values so it can be loaded to glsl
-    getSpatialsForShader(): Spatial[] {
-        const arr = [...spatials];
+    getSpatialsForShader(): SpatialShaderRepr[] {
+        const arr = spatials.map((s) => ({
+            bottom: s.bottom(),
+            radius: s.radius,
+        }));
         arr.length = Grass.MAX_SPATIALS;
 
-        return arr.fill({
-            position: new THREE.Vector3(),
-            radius: 0
-        },
+        return arr.fill(
+            {
+                bottom: new THREE.Vector3(),
+                radius: 0
+            },
             spatials.length,
             Grass.MAX_SPATIALS
         );
@@ -85,8 +100,8 @@ export class Grass extends THREE.Mesh implements Behaviour {
             BufferGeometryUtils.mergeGeometries(blades),
             new THREE.ShaderMaterial({
                 uniforms: this.shaderUniforms,
-                vertexShader: joinShaders([compare_s, map_range_s, worley_s, grass_vs]),
-                fragmentShader: joinShaders([worley_s, grass_fs]),
+                vertexShader: joinShaders([compare_s, map_range_s, random_s, grass_vs]),
+                fragmentShader: joinShaders([random_s, grass_fs]),
                 side: THREE.DoubleSide,
                 transparent: true,
             })
@@ -121,6 +136,10 @@ export class Grass extends THREE.Mesh implements Behaviour {
         geom.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
         geom.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
         geom.setAttribute("a_blade_origin", new THREE.BufferAttribute(blade_origin, 3));
+
+        geom.rotateX(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.x, Grass.BLADE_ROTATION.max.x));
+        geom.rotateY(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.y, Grass.BLADE_ROTATION.max.y));
+        geom.rotateZ(THREE.MathUtils.randFloat(Grass.BLADE_ROTATION.min.z, Grass.BLADE_ROTATION.max.z));
 
         geom.translate(position.x, position.y, 0);
 

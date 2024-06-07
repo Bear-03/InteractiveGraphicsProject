@@ -1,10 +1,9 @@
-// Generates a random vector with components of range [0, 1) associated to a position
-vec2 rand2(vec2 position) {
+// Generates a random vector with components in range [0, 1) associated to a seed value 
+vec2 rand(vec2 seed) {
     // The magic numbers are just arbitrary to simulate pseudorandomness
-
     return fract(sin(vec2( //
-    dot(position, vec2(127.32, 231.4)), //
-    dot(position, vec2(12.3, 146.3)) //
+    dot(seed, vec2(127.32, 231.4)), //
+    dot(seed, vec2(12.3, 146.3)) //
     )) * 231.23);
 }
 
@@ -19,7 +18,7 @@ float worley(vec2 position) {
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
             vec2 checking_cell = vec2(x, y); // Relative to this_cell
-            float dist_to_position = length(checking_cell + rand2(this_cell + checking_cell) - this_pos_in_cell);
+            float dist_to_position = length(checking_cell + rand(this_cell + checking_cell) - this_pos_in_cell);
             min_dist = min(min_dist, dist_to_position);
         }
     }

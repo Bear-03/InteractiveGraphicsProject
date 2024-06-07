@@ -11,7 +11,7 @@ export interface Behaviour extends THREE.Object3D {
 }
 
 export interface Spatial {
-    position: THREE.Vector3,
+    bottom(): THREE.Vector3,
     radius: number,
 }
 
@@ -21,7 +21,7 @@ function isBehaviour(obj: THREE.Object3D): obj is Behaviour {
 
 function isSpatial(obj: Object): obj is Spatial {
     return (
-        (obj as Spatial).position !== undefined &&
+        (obj as Spatial).bottom !== undefined &&
         (obj as Spatial).radius !== undefined
     );
 }
