@@ -29,11 +29,6 @@ struct Spatial {
     float radius;
 };
 
-struct Influence {
-    vec3 blade_direction;
-    vec3 displacement; // |blade_direction - UP|
-};
-
 attribute vec3 a_blade_origin;
 
 uniform float u_time;
@@ -62,24 +57,12 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 }
 
 // Returns the direction and amount the vertex should move because of wind
-Influence wind_influence(Influence influence) {
-    // Wind should not be applied if the grass is suffering spatial influence
-    // because grass that is "stepped on" does not move too much
-    float wind_multiplier = 1.0;
-    if (equal_approx(length(influence.displacement), 0.0)) {
-        wind_multiplier = 1.0;
-    } else {
-        wind_multiplier = WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE / length(influence.displacement);
-    }
-
-    float angle = v_height * WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
-    vec3 new_blade_direction = rotate_towards(UP, vec3(WIND_DIRECTION, 0), min(angle, MAX_TURN_ANGLE));
-    vec3 blade_direction = normalize(influence.blade_direction + new_blade_direction);
-    return Influence(blade_direction, blade_direction - UP);
+vec3 wind_influence(vec3 height) {
+    float angle = WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
+    return rotate_towards(height, vec3(WIND_DIRECTION, 0), min(angle, MAX_TURN_ANGLE));
 }
 
-
-Influence spatial_influence(Influence influence) {
+/*Influence spatial_influence(Influence influence) {
     vec3 new_blade_direction = vec3(0.0);
 
     for (int i = 0; i < MAX_SPATIALS; i++) {
@@ -102,7 +85,7 @@ Influence spatial_influence(Influence influence) {
 
     vec3 blade_direction = normalize(influence.blade_direction + new_blade_direction);
     return Influence(blade_direction, blade_direction - UP);
-}
+}*/
 
 void main() {
     v_height = uv.y;
@@ -110,11 +93,13 @@ void main() {
 
     // We could just add the offset to the vertex position
     // but that results in stretching
+    vec3 height = vec3(0.0, 0.0, position.z);
 
-    Influence influence = Influence(UP, vec3(0.0)); // Start with no influence at all
-    influence = spatial_influence(influence);
-    influence = wind_influence(influence);
-    v_influence_magnitude = length(influence.displacement);
+    vec3 new_height;
+    //influence = spatial_influence(influence);
+    new_height = wind_influence(height);
+    v_influence_magnitude = length(new_height - height);
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + influence.displacement, 1.0);
+    vec3 new_pos = vec3(position.xy, 0.0) + new_height;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(new_pos, 1.0);
 }
