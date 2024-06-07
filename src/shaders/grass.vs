@@ -25,7 +25,7 @@
 #define MAX_TURN_ANGLE PI / 2.0
 
 struct Spatial {
-    vec3 position;
+    vec3 bottom;
     float radius;
 };
 
@@ -43,7 +43,6 @@ uniform int u_spatials_len;
 varying float v_height;
 varying float v_influence_magnitude;
 varying vec3 v_blade_origin;
-varying vec3 v_position;
 
 float worley(vec2 position);
 float map_range(float value, float in_min, float in_max, float out_min, float out_max);
@@ -73,7 +72,7 @@ Influence wind_influence(Influence influence) {
         wind_multiplier = WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE / length(influence.displacement);
     }
 
-    float angle = v_height * WIND_STRENGTH * worley(WIND_DENSITY * position.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
+    float angle = v_height * WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
     vec3 new_blade_direction = rotate_towards(UP, vec3(WIND_DIRECTION, 0), min(angle, MAX_TURN_ANGLE));
     vec3 blade_direction = normalize(influence.blade_direction + new_blade_direction);
     return Influence(blade_direction, blade_direction - UP);
@@ -91,13 +90,12 @@ Influence spatial_influence(Influence influence) {
         Spatial spatial = u_spatials[i];
         // Spatial position needs to have the y and z swapped because
         // of the change in coordinate system from threejs to webgl
-        vec3 distance = position - spatial.position;
+        vec3 distance = position - spatial.bottom;
         vec2 influence_dir = distance.xy;
 
-        float angle;
         // Cases go from furthest to closest
         float t = clamp(v_height * SPATIAL_INFLUENCE_STRENGTH * map_range(length(distance), spatial.radius, SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), 0.0, 1.0);
-        angle = mix(0.0, MAX_TURN_ANGLE, t);
+        float angle = mix(0.0, MAX_TURN_ANGLE, t);
 
         new_blade_direction += rotate_towards(UP, vec3(influence_dir, 0.0), angle);
     }
@@ -106,43 +104,17 @@ Influence spatial_influence(Influence influence) {
     return Influence(blade_direction, blade_direction - UP);
 }
 
-// Explanation: https://www.math3d.org/EWP78UwMc
-vec3 facing_camera_displacement() {
-    // We wanna treat all pixels equal, regardless of height
-    vec3 origin_relative_position = position - a_blade_origin;
-    // We remove the z because we don't care about facing the camera height-wise either, it will look weird
-    vec2 camera_dir_flat = normalize(cameraPosition - a_blade_origin).xy;
-
-    // For the blade to look in the direction of the camera, the edges have to be
-    // perpendicular to both the cam vector and the up vector
-
-    // There are two possible perpendicular vectors, in order to rotate
-    // each side of the leaf has to get a different one
-    float side = uv.x < 0.5 ? 1.0 : -1.0;
-    // This vector will always have z = 0 so we keep only xy
-    vec2 new_dir = side * normalize(cross(vec3(camera_dir_flat, 0.0), UP).xy);
-
-    // We only want to rotate sideways, so z is preserved
-    vec3 new_origin_relative_position = vec3(length(origin_relative_position.xy) * new_dir, origin_relative_position.z);
-
-    vec3 displacement = new_origin_relative_position - origin_relative_position;
-    return displacement;
-}
-
 void main() {
     v_height = uv.y;
     v_blade_origin = a_blade_origin;
-    v_position = position;
-
-    vec3 adjusted_position = position + facing_camera_displacement();
 
     // We could just add the offset to the vertex position
     // but that results in stretching
 
     Influence influence = Influence(UP, vec3(0.0)); // Start with no influence at all
-    //influence = spatial_influence(influence);
-    //influence = wind_influence(influence);
+    influence = spatial_influence(influence);
+    influence = wind_influence(influence);
     v_influence_magnitude = length(influence.displacement);
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(adjusted_position + influence.displacement, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position + influence.displacement, 1.0);
 }
