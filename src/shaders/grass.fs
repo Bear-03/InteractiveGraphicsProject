@@ -10,15 +10,15 @@ precision mediump float;
 uniform vec3 u_colorBottom;
 uniform vec3 u_colorTop;
 
-varying float v_height;
-varying float v_influence_magnitude;
-varying vec3 v_blade_origin;
+varying vec2 v_uv;
+varying float v_displacement;
 
 void main() {
     // The valleys should will brighter for a more natural effect
-    vec3 shininess = SHININESS_COLOR * SHININESS_INTENSITY * v_influence_magnitude;
-    vec3 diffuse = mix(u_colorBottom, u_colorTop, v_height);
+    vec3 shininess = SHININESS_COLOR * SHININESS_INTENSITY * v_displacement;
+    vec3 diffuse = mix(u_colorBottom, u_colorTop, v_uv.y);
+    float alpha = min(HEIGHT_TRANSPARENCY_RELATION * v_uv.y, 1.0);
 
     // TODO: Maybe base gradient based on length(position - blade origin) rather than height
-    gl_FragColor = vec4(diffuse + shininess, min(HEIGHT_TRANSPARENCY_RELATION * v_height, 1.0));
+    gl_FragColor = vec4(diffuse + shininess, alpha);
 }

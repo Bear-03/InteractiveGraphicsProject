@@ -13,12 +13,12 @@
 // How zoomed in the pattern is
 #define WIND_DENSITY 0.3
 // How much wind influences the grass when there is also spatial influence
-#define WIND_INFLUENCE_WHEN_SPATIAL_INFLUENCE 0.1
+#define WIND_SPATIAL_COEF 0.05
 
 // How much spatial influence moves the blades
-#define SPATIAL_INFLUENCE_STRENGTH 1.0
+#define SPATIAL_INFLUENCE_STRENGTH 0.4
 // How far spatial influence goes
-#define SPATIAL_INFLUENCE_MAX_DISTANCE 1.2
+#define SPATIAL_INFLUENCE_MAX_DISTANCE 0.7
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
 
@@ -35,20 +35,23 @@ uniform float u_time;
 uniform Spatial u_spatials[MAX_SPATIALS];
 uniform int u_spatials_len;
 
-varying float v_height;
-varying float v_influence_magnitude;
+varying float v_displacement;
+varying vec2 v_uv;
 varying vec3 v_blade_origin;
 
 float worley(vec2 position);
 float map_range(float value, float in_min, float in_max, float out_min, float out_max);
-bool equal_approx(vec2 a, vec2 b);
 bool equal_approx(float a, float b);
+
+float angle_between(vec3 a, vec3 b) {
+    return acos(dot(a, b) / (length(a) * length(b)));
+}
 
 // Source: https://math.stackexchange.com/a/4306149
 vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
     vec3 normalized_this = normalize(vec);
     vec3 normalized_target = normalize(target);
-    float new_angle = acos(dot(normalized_this, normalized_target)) - angle;
+    float new_angle = angle_between(vec, target) - angle;
 
     // Unit vector in the plane of this and target and perpendicular to target
     vec3 perp = cross(normalize(cross(normalized_target, normalized_this)), normalized_target);
@@ -57,14 +60,23 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 }
 
 // Returns the direction and amount the vertex should move because of wind
-vec3 wind_influence(vec3 height) {
-    float angle = WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
-    return rotate_towards(height, vec3(WIND_DIRECTION, 0), min(angle, MAX_TURN_ANGLE));
+vec3 wind_influence(vec3 height, vec3 original_height) {
+    // If there is spatial influence (something is stepping on the wind) the grass shouldn't move as much
+    // Angle
+    float influence_proportion = angle_between(height, original_height) / MAX_TURN_ANGLE;
+    float wind_multiplier;
+    if (equal_approx(influence_proportion, 0.0)) {
+        wind_multiplier = 1.0;
+    } else {
+        float s = WIND_SPATIAL_COEF;
+        wind_multiplier = s / (influence_proportion + s);
+    }
+
+    float angle = wind_multiplier * WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
+    return rotate_towards(height, vec3(WIND_DIRECTION, 0), angle);
 }
 
-/*Influence spatial_influence(Influence influence) {
-    vec3 new_blade_direction = vec3(0.0);
-
+vec3 spatial_influence(vec3 height) {
     for (int i = 0; i < MAX_SPATIALS; i++) {
         if (i >= u_spatials_len) {
             break;
@@ -73,32 +85,30 @@ vec3 wind_influence(vec3 height) {
         Spatial spatial = u_spatials[i];
         // Spatial position needs to have the y and z swapped because
         // of the change in coordinate system from threejs to webgl
-        vec3 distance = position - spatial.bottom;
-        vec2 influence_dir = distance.xy;
+        vec2 influence_dir = a_blade_origin.xy - spatial.bottom.xy;
 
         // Cases go from furthest to closest
-        float t = clamp(v_height * SPATIAL_INFLUENCE_STRENGTH * map_range(length(distance), spatial.radius, SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), 0.0, 1.0);
+        float t = clamp(SPATIAL_INFLUENCE_STRENGTH * map_range(length(influence_dir), spatial.radius, spatial.radius + SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), 0.0, 1.0);
         float angle = mix(0.0, MAX_TURN_ANGLE, t);
 
-        new_blade_direction += rotate_towards(UP, vec3(influence_dir, 0.0), angle);
+        height = rotate_towards(height, vec3(influence_dir, 0.0), angle);
     }
 
-    vec3 blade_direction = normalize(influence.blade_direction + new_blade_direction);
-    return Influence(blade_direction, blade_direction - UP);
-}*/
+    return height;
+}
 
 void main() {
-    v_height = uv.y;
+    v_uv = uv;
     v_blade_origin = a_blade_origin;
 
     // We could just add the offset to the vertex position
     // but that results in stretching
     vec3 height = vec3(0.0, 0.0, position.z);
 
-    vec3 new_height;
-    //influence = spatial_influence(influence);
-    new_height = wind_influence(height);
-    v_influence_magnitude = length(new_height - height);
+    vec3 new_height = height;
+    new_height = spatial_influence(new_height);
+    new_height = wind_influence(new_height, height);
+    v_displacement = length(new_height - height);
 
     vec3 new_pos = vec3(position.xy, 0.0) + new_height;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(new_pos, 1.0);
