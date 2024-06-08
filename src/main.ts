@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Ground } from "./grass";
-import { debugMode, instantiate, behaviours } from "./lib";
+import { instantiate, behaviours } from "./lib";
 import { Sphere } from "./sphere";
 import { Camera } from "./camera";
 import { CircularTrajectoryZ, LinearTrajectory } from "./trajectories";
@@ -34,11 +34,6 @@ function start(): void {
     light.position.set(-10, -10, 10);
     light.castShadow = true;
     instantiate(light, scene);
-
-    if (debugMode) {
-        const sunlight_helper = new THREE.DirectionalLightHelper(light, 5);
-        instantiate(sunlight_helper, scene);
-    }
 
     const grass = new Ground();
     instantiate(grass, scene);

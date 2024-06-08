@@ -4,7 +4,6 @@ import * as THREE from "three";
 export type Range<T> = { min: T, max: T };
 
 export const MAX_SPATIALS = 10;
-export const debugMode = false;
 export const behaviours: Behaviour[] = []
 export const spatials: Spatial[] = []
 
