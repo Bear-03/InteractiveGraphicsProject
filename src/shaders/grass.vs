@@ -74,6 +74,10 @@ vec3 spatial_influence(vec3 height) {
 
         vec3 influence_dir = a_blade_origin - spatial.center;
 
+        if (length(influence_dir) > spatial.radius + u_spatial_max_distance) {
+            continue;
+        }
+
         float t = clamp( //
         u_spatial_strength * map_range(length(influence_dir), spatial.radius, spatial.radius + u_spatial_max_distance, 1.0, 0.0), //
         0.0, //
