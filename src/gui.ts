@@ -88,30 +88,30 @@ export class Gui {
 
         const groundFolder = this.menu.addFolder("Ground");
         this.addColorOption(groundFolder, this.options.ground.color).name("Color");
-        this.addOption(groundFolder, this.options.ground.size).name("Size");
-        this.addOption(groundFolder, this.options.ground.margin).name("Margin");
+        this.addOption(groundFolder, this.options.ground.size).name("Size").min(0).max(30);
+        this.addOption(groundFolder, this.options.ground.margin).name("Margin").min(0).max(1);
 
         const bladeFolder = this.menu.addFolder("Grass blades");
         this.addColorOption(bladeFolder, this.options.blades.tipColor).name("Tip color");
         this.addColorOption(bladeFolder, this.options.blades.baseColor).name("Base color");
         this.addColorOption(bladeFolder, this.options.blades.shineColor).name("Shine color");
-        this.addOption(bladeFolder, this.options.blades.shineIntensity).name("Shine intensity");
-        this.addOption(bladeFolder, this.options.blades.transparentProportion).name("Transparent proportion");
-        this.addOption(bladeFolder, this.options.blades.width).name("Width");
-        this.addOption(bladeFolder, this.options.blades.height).name("Height");
-        this.addOption(bladeFolder, this.options.blades.density).name("Density (no. of blades per m^2)");
-        this.addOption(bladeFolder, this.options.blades.minHeightMultiplier).name("Min height multiplier");
-        this.addOption(bladeFolder, this.options.blades.maxHeightMultiplier).name("Max height multiplier");
+        this.addOption(bladeFolder, this.options.blades.shineIntensity).name("Shine intensity").min(0).max(5);
+        this.addOption(bladeFolder, this.options.blades.transparentProportion).name("Transparent proportion").min(0).max(1);
+        this.addOption(bladeFolder, this.options.blades.width).name("Width").min(0).max(1);
+        this.addOption(bladeFolder, this.options.blades.height).name("Height").min(0).max(1.5);
+        this.addOption(bladeFolder, this.options.blades.density).name("Density (no. of blades per m^2)").min(0).max(1000);
+        this.addOption(bladeFolder, this.options.blades.minHeightMultiplier).name("Min height multiplier").min(-2).max(2);
+        this.addOption(bladeFolder, this.options.blades.maxHeightMultiplier).name("Max height multiplier").min(-2).max(2);
 
         const windFolder = this.menu.addFolder("Wind");
-        this.addOption(windFolder, this.options.wind.strength).name("Strength");
-        this.addOption(windFolder, this.options.wind.speed).name("Speed");
-        this.addOption(windFolder, this.options.wind.density).name("Density");
-        this.addOption(windFolder, this.options.wind.directionAngle).name("Direction angle");
+        this.addOption(windFolder, this.options.wind.strength).name("Strength").min(0).max(3);
+        this.addOption(windFolder, this.options.wind.speed).name("Speed").min(0).max(3);
+        this.addOption(windFolder, this.options.wind.density).name("Density").min(0).max(3);
+        this.addOption(windFolder, this.options.wind.directionAngle).name("Direction angle").min(0).max(360);
 
         const spatialFolder = this.menu.addFolder("Spatial");
-        this.addOption(spatialFolder, this.options.spatial.strength).name("Strength");
-        this.addOption(spatialFolder, this.options.spatial.maxDistance).name("Max influence distance");
+        this.addOption(spatialFolder, this.options.spatial.strength).name("Strength").min(0).max(10);
+        this.addOption(spatialFolder, this.options.spatial.maxDistance).name("Max influence distance").min(0).max(5);
 
         const debugFolder = this.menu.addFolder("Debug");
         this.addOption(debugFolder, this.options.debug.showFps).name("Show FPS").onChange((v) => {
