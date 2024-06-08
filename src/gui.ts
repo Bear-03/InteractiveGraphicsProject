@@ -28,6 +28,12 @@ export type MenuOptions = {
         height: MenuOption<number>,
         minHeightMultiplier: MenuOption<number>,
         maxHeightMultiplier: MenuOption<number>,
+    },
+    wind: {
+        strength: MenuOption<number>,
+        speed: MenuOption<number>,
+        density: MenuOption<number>,
+        directionAngle: MenuOption<number>,
     }
     debug: {
         showFps: MenuOption<boolean>,
@@ -52,6 +58,12 @@ export class Gui {
             minHeightMultiplier: { value: -0.5, controller: null! },
             maxHeightMultiplier: { value: 0.5, controller: null! },
         },
+        wind: {
+            strength: { value: 1, controller: null! },
+            speed: { value: 0.6, controller: null! },
+            density: { value: 0.15, controller: null! },
+            directionAngle: { value: 45, controller: null! },
+        },
         debug: {
             showFps: { value: true, controller: null! },
         }
@@ -73,6 +85,12 @@ export class Gui {
         this.addOption(bladeFolder, this.options.blades.density).name("Density (no. of blades per m^2)");
         this.addOption(bladeFolder, this.options.blades.minHeightMultiplier).name("Min height multiplier");
         this.addOption(bladeFolder, this.options.blades.maxHeightMultiplier).name("Max height multiplier");
+
+        const windFolder = this.menu.addFolder("Wind");
+        this.addOption(windFolder, this.options.wind.strength).name("Strength");
+        this.addOption(windFolder, this.options.wind.speed).name("Speed");
+        this.addOption(windFolder, this.options.wind.density).name("Density");
+        this.addOption(windFolder, this.options.wind.directionAngle).name("Direction angle");
 
         const debugFolder = this.menu.addFolder("Debug");
         this.addOption(debugFolder, this.options.debug.showFps).name("Show FPS").onChange((v) => {

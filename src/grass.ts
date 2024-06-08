@@ -23,6 +23,8 @@ type GrassShaderUniforms = {
     u_spatials_len: { value: number },
     u_wind_strength: { value: number },
     u_wind_speed: { value: number },
+    u_wind_direction: { value: THREE.Vector2 },
+    u_wind_density: { value: number },
 }
 
 export class Ground extends THREE.Mesh implements Behaviour {
@@ -59,6 +61,8 @@ export class Ground extends THREE.Mesh implements Behaviour {
             u_spatials_len: { value: spatials.length },
             u_wind_strength: { value: 1.0 },
             u_wind_speed: { value: 0.6 },
+            u_wind_direction: { value: new THREE.Vector2() },
+            u_wind_density: { value: 0.15 },
         };
 
 
@@ -185,6 +189,18 @@ export class Ground extends THREE.Mesh implements Behaviour {
         gui.options.blades.minHeightMultiplier.controller.onChange(() => this.onBladeGeometryChange());
         gui.options.blades.maxHeightMultiplier.controller.onChange(() => this.onBladeGeometryChange());
         this.onBladeGeometryChange();
+
+        gui.options.wind.strength.controller.onChange(() => this.onWindStrengthChange());
+        this.onWindStrengthChange();
+
+        gui.options.wind.speed.controller.onChange(() => this.onWindSpeedChange());
+        this.onWindSpeedChange();
+
+        gui.options.wind.directionAngle.controller.onChange(() => this.onWindDirAngleChange());
+        this.onWindDirAngleChange();
+
+        gui.options.wind.density.controller.onChange(() => this.onWindDensityChange());
+        this.onWindDensityChange();
     }
 
     onGroundColorChange() {
@@ -213,5 +229,22 @@ export class Ground extends THREE.Mesh implements Behaviour {
             { min: bladeOptions.minHeightMultiplier.value, max: bladeOptions.maxHeightMultiplier.value },
             gui.options.ground.size.value,
         ));
+    }
+
+    onWindStrengthChange() {
+        this.shaderUniforms.u_wind_strength.value = gui.options.wind.strength.value;
+    }
+
+    onWindSpeedChange() {
+        this.shaderUniforms.u_wind_speed.value = gui.options.wind.speed.value;
+    }
+
+    onWindDirAngleChange() {
+        const angle = THREE.MathUtils.degToRad(gui.options.wind.directionAngle.value);
+        this.shaderUniforms.u_wind_direction.value.set(Math.cos(angle), Math.sin(angle));
+    }
+
+    onWindDensityChange() {
+        this.shaderUniforms.u_wind_density.value = gui.options.wind.density.value;
     }
 }

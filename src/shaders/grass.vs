@@ -5,7 +5,7 @@
 
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
-#define MAX_TURN_ANGLE M_PI / 2.0
+#define MAX_TURN_ANGLE M_PI / 2.0 - 0.2
 
 struct Spatial {
     vec3 center;
@@ -20,9 +20,9 @@ uniform float u_wind_strength;
 // How fast the noise pattern moves
 uniform float u_wind_speed;
 // In which direction the pattern moves
-#define WIND_DIRECTION normalize(vec2(1.0, 1.0))
+uniform vec2 u_wind_direction;
 // How zoomed in the pattern is
-#define WIND_DENSITY 0.15
+uniform float u_wind_density;
 
 // How much spatial influence moves the blades
 #define SPATIAL_INFLUENCE_STRENGTH 0.7
@@ -60,8 +60,8 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 
 // Returns the direction and amount the vertex should move because of wind
 vec3 wind_influence(vec3 height) {
-    float angle = u_wind_strength * worley(WIND_DENSITY * a_blade_origin.xy + u_wind_speed * u_time * -WIND_DIRECTION);
-    return rotate_towards(height, vec3(WIND_DIRECTION, 0), angle);
+    float angle = u_wind_strength * worley(u_wind_density * a_blade_origin.xy + u_wind_speed * u_time * -u_wind_direction);
+    return rotate_towards(height, vec3(u_wind_direction, 0), min(angle, MAX_TURN_ANGLE));
 }
 
 vec3 spatial_influence(vec3 height) {
@@ -98,7 +98,7 @@ void main() {
     vec3 new_height = height;
     new_height = spatial_influence(new_height);
     new_height = wind_influence(new_height);
-    v_displacement = length(new_height - height);
+    v_displacement = length(new_height - height) / position.z;
 
     csm_Position = vec3(position.xy, 0.0) + new_height;
 }
