@@ -1,11 +1,12 @@
+import { defineConfig } from "vite";
 import checker from "vite-plugin-checker";
 import glsl from "vite-plugin-glsl";
 
-export default {
+export default defineConfig({
     root: "src",
     publicDir: "../public",
     build: {
-        outDir: "../dist"
+        outDir: "../dist",
     },
     plugins: [
         glsl(),
@@ -13,10 +14,4 @@ export default {
             typescript: true,
         })
     ],
-    server: {
-        watch: {
-            usePolling: true,
-        }
-    },
-
-}
+});

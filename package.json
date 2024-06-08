@@ -15,6 +15,7 @@
     "three-custom-shader-material": "^5.4.0"
   },
   "devDependencies": {
+    "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.1",
     "@types/three": "^0.165.0",
     "eslint": "^8.57.0",
