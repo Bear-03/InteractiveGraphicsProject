@@ -12,7 +12,7 @@ const GRASS_BASE_COLOR = 0x3d8b38;
 const GRASS_TIP_COLOR = 0x7ec53c;
 
 type SpatialShaderRepr = {
-    bottom: THREE.Vector3,
+    center: THREE.Vector3,
     radius: number,
 }
 
@@ -63,14 +63,14 @@ export class Grass extends THREE.Mesh implements Behaviour {
     // Extends the spatials array with dummy values so it can be loaded to glsl
     getSpatialsForShader(): SpatialShaderRepr[] {
         const arr = spatials.map((s) => ({
-            bottom: s.bottom(),
+            center: s.center(),
             radius: s.radius,
         }));
         arr.length = Grass.MAX_SPATIALS;
 
         return arr.fill(
             {
-                bottom: new THREE.Vector3(),
+                center: new THREE.Vector3(),
                 radius: 0
             },
             spatials.length,

@@ -4,6 +4,7 @@ import { debugMode, instantiate, behaviours } from "./lib";
 import { Sphere } from "./sphere";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import { Camera } from "./camera";
+import { CircularTrajectoryZ, LinearTrajectory } from "./trajectories";
 
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
 
@@ -47,9 +48,31 @@ function start(): void {
     const grass = new Grass();
     instantiate(grass, scene);
 
-    const sphere = new Sphere(1);
-    sphere.position.set(2, 2, sphere.radius);
-    instantiate(sphere, scene);
+    const sphereRadius = 1;
+
+    const sphereCircular = new Sphere(
+        sphereRadius,
+        new THREE.Color(0xff0000),
+        new CircularTrajectoryZ(
+            new THREE.Vector3(0, 0, sphereRadius),
+            3,
+            0.5
+        )
+    );
+    instantiate(sphereCircular, scene);
+
+    const sphereLinear = new Sphere(
+        sphereRadius,
+        new THREE.Color(0x0000ff),
+        new LinearTrajectory(0.5,
+            new THREE.Vector3(0,
+                0,
+                sphereRadius
+            ),
+            new THREE.Vector3(0, 0, 4)
+        )
+    );
+    instantiate(sphereLinear, scene);
 }
 
 function update(delta: number): void {

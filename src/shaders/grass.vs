@@ -11,21 +11,19 @@
  // In which direction the pattern moves
 #define WIND_DIRECTION normalize(vec2(1.0, 1.0))
 // How zoomed in the pattern is
-#define WIND_DENSITY 0.3
-// How much wind influences the grass when there is also spatial influence
-#define WIND_SPATIAL_COEF 0.05
+#define WIND_DENSITY 0.2
 
 // How much spatial influence moves the blades
-#define SPATIAL_INFLUENCE_STRENGTH 0.4
+#define SPATIAL_INFLUENCE_STRENGTH 0.7
 // How far spatial influence goes
-#define SPATIAL_INFLUENCE_MAX_DISTANCE 0.7
+#define SPATIAL_INFLUENCE_MAX_DISTANCE 1.0
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
 
 #define MAX_TURN_ANGLE PI / 2.0
 
 struct Spatial {
-    vec3 bottom;
+    vec3 center;
     float radius;
 };
 
@@ -61,18 +59,7 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 
 // Returns the direction and amount the vertex should move because of wind
 vec3 wind_influence(vec3 height, vec3 original_height) {
-    // If there is spatial influence (something is stepping on the wind) the grass shouldn't move as much
-    // Angle
-    float influence_proportion = angle_between(height, original_height) / MAX_TURN_ANGLE;
-    float wind_multiplier;
-    if (equal_approx(influence_proportion, 0.0)) {
-        wind_multiplier = 1.0;
-    } else {
-        float s = WIND_SPATIAL_COEF;
-        wind_multiplier = s / (influence_proportion + s);
-    }
-
-    float angle = wind_multiplier * WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
+    float angle = WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
     return rotate_towards(height, vec3(WIND_DIRECTION, 0), angle);
 }
 
@@ -85,13 +72,13 @@ vec3 spatial_influence(vec3 height) {
         Spatial spatial = u_spatials[i];
         // Spatial position needs to have the y and z swapped because
         // of the change in coordinate system from threejs to webgl
-        vec2 influence_dir = a_blade_origin.xy - spatial.bottom.xy;
+        vec3 influence_dir = a_blade_origin - spatial.center;
 
         // Cases go from furthest to closest
         float t = clamp(SPATIAL_INFLUENCE_STRENGTH * map_range(length(influence_dir), spatial.radius, spatial.radius + SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), 0.0, 1.0);
         float angle = mix(0.0, MAX_TURN_ANGLE, t);
 
-        height = rotate_towards(height, vec3(influence_dir, 0.0), angle);
+        height = rotate_towards(height, influence_dir, angle);
     }
 
     return height;
