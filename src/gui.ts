@@ -75,8 +75,8 @@ export class Gui {
             directionAngle: { value: 45, controller: null! },
         },
         spatial: {
-            strength: { value: 0.7, controller: null! },
-            maxDistance: { value: 0.7, controller: null! },
+            strength: { value: 1, controller: null! },
+            maxDistance: { value: 0.6, controller: null! },
         },
         debug: {
             showFps: { value: true, controller: null! },
@@ -99,7 +99,7 @@ export class Gui {
         this.addOption(bladeFolder, this.options.blades.transparentProportion).name("Transparent proportion").min(0).max(1);
         this.addOption(bladeFolder, this.options.blades.width).name("Width").min(0).max(1);
         this.addOption(bladeFolder, this.options.blades.height).name("Height").min(0).max(1.5);
-        this.addOption(bladeFolder, this.options.blades.density).name("Density (no. of blades per m^2)").min(0).max(1000);
+        this.addOption(bladeFolder, this.options.blades.density).name("Density").min(0).max(1000);
         this.addOption(bladeFolder, this.options.blades.minHeightMultiplier).name("Min height multiplier").min(-2).max(2);
         this.addOption(bladeFolder, this.options.blades.maxHeightMultiplier).name("Max height multiplier").min(-2).max(2);
 
