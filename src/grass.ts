@@ -17,8 +17,8 @@ type SpatialShaderRepr = {
 }
 
 type GrassShaderUniforms = {
-    u_colorBottom: { value: THREE.Color },
-    u_colorTop: { value: THREE.Color },
+    u_color_bottom: { value: THREE.Color },
+    u_color_top: { value: THREE.Color },
     u_time: { value: number },
     u_spatials: { value: SpatialShaderRepr[] },
     u_spatials_len: { value: number },
@@ -49,8 +49,8 @@ export class Grass extends THREE.Mesh implements Behaviour {
         )
 
         this.shaderUniforms = {
-            u_colorBottom: { value: new THREE.Color(GRASS_BASE_COLOR) },
-            u_colorTop: { value: new THREE.Color(GRASS_TIP_COLOR) },
+            u_color_bottom: { value: new THREE.Color(GRASS_BASE_COLOR) },
+            u_color_top: { value: new THREE.Color(GRASS_TIP_COLOR) },
             u_time: { value: 0 },
             u_spatials: { value: this.getSpatialsForShader() },
             u_spatials_len: { value: spatials.length },
