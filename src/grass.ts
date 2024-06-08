@@ -25,6 +25,8 @@ type GrassShaderUniforms = {
     u_wind_speed: { value: number },
     u_wind_direction: { value: THREE.Vector2 },
     u_wind_density: { value: number },
+    u_spatial_strength: { value: number },
+    u_spatial_max_distance: { value: number },
 }
 
 export class Ground extends THREE.Mesh implements Behaviour {
@@ -63,6 +65,8 @@ export class Ground extends THREE.Mesh implements Behaviour {
             u_wind_speed: { value: 0.6 },
             u_wind_direction: { value: new THREE.Vector2() },
             u_wind_density: { value: 0.15 },
+            u_spatial_strength: { value: 0.7 },
+            u_spatial_max_distance: { value: 0.7 },
         };
 
 
@@ -201,6 +205,12 @@ export class Ground extends THREE.Mesh implements Behaviour {
 
         gui.options.wind.density.controller.onChange(() => this.onWindDensityChange());
         this.onWindDensityChange();
+
+        gui.options.spatial.strength.controller.onChange(() => this.onSpatialStrengthChange());
+        this.onSpatialStrengthChange();
+
+        gui.options.spatial.maxDistance.controller.onChange(() => this.onSpatialMaxDistanceChange());
+        this.onSpatialMaxDistanceChange();
     }
 
     onGroundColorChange() {
@@ -246,5 +256,13 @@ export class Ground extends THREE.Mesh implements Behaviour {
 
     onWindDensityChange() {
         this.shaderUniforms.u_wind_density.value = gui.options.wind.density.value;
+    }
+
+    onSpatialStrengthChange() {
+        this.shaderUniforms.u_spatial_strength.value = gui.options.spatial.strength.value;
+    }
+
+    onSpatialMaxDistanceChange() {
+        this.shaderUniforms.u_spatial_max_distance.value = gui.options.spatial.maxDistance.value;
     }
 }

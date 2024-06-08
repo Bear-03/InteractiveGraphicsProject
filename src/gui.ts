@@ -34,6 +34,10 @@ export type MenuOptions = {
         speed: MenuOption<number>,
         density: MenuOption<number>,
         directionAngle: MenuOption<number>,
+    },
+    spatial: {
+        strength: MenuOption<number>,
+        maxDistance: MenuOption<number>,
     }
     debug: {
         showFps: MenuOption<boolean>,
@@ -64,6 +68,10 @@ export class Gui {
             density: { value: 0.15, controller: null! },
             directionAngle: { value: 45, controller: null! },
         },
+        spatial: {
+            strength: { value: 0.7, controller: null! },
+            maxDistance: { value: 0.7, controller: null! },
+        },
         debug: {
             showFps: { value: true, controller: null! },
         }
@@ -91,6 +99,10 @@ export class Gui {
         this.addOption(windFolder, this.options.wind.speed).name("Speed");
         this.addOption(windFolder, this.options.wind.density).name("Density");
         this.addOption(windFolder, this.options.wind.directionAngle).name("Direction angle");
+
+        const spatialFolder = this.menu.addFolder("Spatial");
+        this.addOption(spatialFolder, this.options.spatial.strength).name("Strength");
+        this.addOption(spatialFolder, this.options.spatial.maxDistance).name("Max influence distance");
 
         const debugFolder = this.menu.addFolder("Debug");
         this.addOption(debugFolder, this.options.debug.showFps).name("Show FPS").onChange((v) => {

@@ -25,9 +25,9 @@ uniform vec2 u_wind_direction;
 uniform float u_wind_density;
 
 // How much spatial influence moves the blades
-#define SPATIAL_INFLUENCE_STRENGTH 0.7
+uniform float u_spatial_strength;
 // How far spatial influence goes
-#define SPATIAL_INFLUENCE_MAX_DISTANCE 0.7
+uniform float u_spatial_max_distance;
 
 
 uniform float u_time;
@@ -75,7 +75,7 @@ vec3 spatial_influence(vec3 height) {
         vec3 influence_dir = a_blade_origin - spatial.center;
 
         float t = clamp( //
-        SPATIAL_INFLUENCE_STRENGTH * map_range(length(influence_dir), spatial.radius, spatial.radius + SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), //
+        u_spatial_strength * map_range(length(influence_dir), spatial.radius, spatial.radius + u_spatial_max_distance, 1.0, 0.0), //
         0.0, //
         1.0 //
         );
