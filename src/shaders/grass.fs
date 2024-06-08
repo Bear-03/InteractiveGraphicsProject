@@ -1,7 +1,7 @@
 precision mediump float;
 
-#define SHININESS_COLOR vec3(0.1, 1.0, 0.1)
-#define SHININESS_INTENSITY 2.0
+#define SHININESS_COLOR vec3(1.0, 1.0, 1.0)
+#define SHININESS_INTENSITY 0.2
 
 #define HEIGHT_TRANSPARENCY_RELATION 5.0
 

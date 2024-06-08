@@ -3,23 +3,8 @@
 #define M_PI 3.1415926535897932384626433832795
 #define UP vec3(0, 0, 1)
 
-// Multiplicator of the values outputted by the noise pattern,
-// i.e. how much difference between hills and valleys of grass
-#define WIND_STRENGTH 1.0
-// How fast the noise pattern moves
-#define WIND_SPEED 0.6
- // In which direction the pattern moves
-#define WIND_DIRECTION normalize(vec2(1.0, 1.0))
-// How zoomed in the pattern is
-#define WIND_DENSITY 0.15
-
-// How much spatial influence moves the blades
-#define SPATIAL_INFLUENCE_STRENGTH 0.7
-// How far spatial influence goes
-#define SPATIAL_INFLUENCE_MAX_DISTANCE 0.7
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
-
 #define MAX_TURN_ANGLE M_PI / 2.0
 
 struct Spatial {
@@ -28,6 +13,22 @@ struct Spatial {
 };
 
 attribute vec3 a_blade_origin;
+
+// Multiplicator of the values outputted by the noise pattern,
+// i.e. how much difference between hills and valleys of grass
+uniform float u_wind_strength;
+// How fast the noise pattern moves
+uniform float u_wind_speed;
+// In which direction the pattern moves
+#define WIND_DIRECTION normalize(vec2(1.0, 1.0))
+// How zoomed in the pattern is
+#define WIND_DENSITY 0.15
+
+// How much spatial influence moves the blades
+#define SPATIAL_INFLUENCE_STRENGTH 0.7
+// How far spatial influence goes
+#define SPATIAL_INFLUENCE_MAX_DISTANCE 0.7
+
 
 uniform float u_time;
 uniform Spatial u_spatials[MAX_SPATIALS];
@@ -58,8 +59,8 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 }
 
 // Returns the direction and amount the vertex should move because of wind
-vec3 wind_influence(vec3 height, vec3 original_height) {
-    float angle = WIND_STRENGTH * worley(WIND_DENSITY * a_blade_origin.xy + WIND_SPEED * u_time * -WIND_DIRECTION);
+vec3 wind_influence(vec3 height) {
+    float angle = u_wind_strength * worley(WIND_DENSITY * a_blade_origin.xy + u_wind_speed * u_time * -WIND_DIRECTION);
     return rotate_towards(height, vec3(WIND_DIRECTION, 0), angle);
 }
 
@@ -96,7 +97,7 @@ void main() {
 
     vec3 new_height = height;
     new_height = spatial_influence(new_height);
-    new_height = wind_influence(new_height, height);
+    new_height = wind_influence(new_height);
     v_displacement = length(new_height - height);
 
     csm_Position = vec3(position.xy, 0.0) + new_height;

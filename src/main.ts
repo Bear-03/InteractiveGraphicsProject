@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Grass } from "./grass";
+import { Ground } from "./grass";
 import { debugMode, instantiate, behaviours } from "./lib";
 import { Sphere } from "./sphere";
 import { Camera } from "./camera";
@@ -8,11 +8,12 @@ import { Gui } from "./gui";
 
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
 
+export const gui = new Gui();
+
 export const renderer = new THREE.WebGLRenderer({ antialias: true });
 export const scene = new THREE.Scene();
 export const camera = new Camera();
 
-const gui = new Gui();
 const clock = new THREE.Clock();
 
 renderer.shadowMap.enabled = true;
@@ -27,7 +28,6 @@ function start(): void {
     instantiate(camera, scene);
     scene.background = new THREE.Color(SKY_COLOR);
 
-
     instantiate(new THREE.AmbientLight(0xffffff, 0.5), scene);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -40,7 +40,7 @@ function start(): void {
         instantiate(sunlight_helper, scene);
     }
 
-    const grass = new Grass();
+    const grass = new Ground();
     instantiate(grass, scene);
 
     const sphereRadius = 1;
@@ -61,11 +61,11 @@ function start(): void {
         new THREE.Color(0x0000ff),
         new LinearTrajectory(
             0.5,
+            new THREE.Vector3(0, 0, 3),
             new THREE.Vector3(0,
                 0,
                 sphereRadius
             ),
-            new THREE.Vector3(0, 0, 3)
         )
     );
     instantiate(sphereLinear, scene);
