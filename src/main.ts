@@ -2,9 +2,9 @@ import * as THREE from "three";
 import { Grass } from "./grass";
 import { debugMode, instantiate, behaviours } from "./lib";
 import { Sphere } from "./sphere";
-import Stats from "three/examples/jsm/libs/stats.module.js";
 import { Camera } from "./camera";
 import { CircularTrajectoryZ, LinearTrajectory } from "./trajectories";
+import { Gui } from "./gui";
 
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
 
@@ -12,14 +12,8 @@ export const renderer = new THREE.WebGLRenderer({ antialias: true });
 export const scene = new THREE.Scene();
 export const camera = new Camera();
 
+const gui = new Gui();
 const clock = new THREE.Clock();
-let stats: Stats;
-
-if (debugMode) {
-    stats = new Stats();
-    stats.showPanel(0);
-    document.body.appendChild(stats.dom);
-}
 
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -32,6 +26,7 @@ const SKY_COLOR = 0x88ddda;
 function start(): void {
     instantiate(camera, scene);
     scene.background = new THREE.Color(SKY_COLOR);
+
 
     instantiate(new THREE.AmbientLight(0xffffff, 0.5), scene);
 
@@ -85,15 +80,11 @@ function update(delta: number): void {
 start();
 
 function animate() {
-    if (debugMode) {
-        stats.begin();
-    }
+    gui.beforeUpdate();
 
     update(clock.getDelta());
 
-    if (debugMode) {
-        stats.end();
-    }
+    gui.afterUpdate();
 
     renderer.render(scene, camera);
 }
