@@ -1,21 +1,19 @@
 precision mediump float;
 
-#define SHININESS_COLOR vec3(1.0, 1.0, 1.0)
-#define SHININESS_INTENSITY 0.2
-
-#define HEIGHT_TRANSPARENCY_RELATION 5.0
-
 uniform vec3 u_color_base;
 uniform vec3 u_color_tip;
+uniform float u_transparent_proportion;
+uniform vec3 u_shine_color;
+uniform float u_shine_intensity;
 
 varying vec2 v_uv;
 varying float v_displacement;
 
 void main() {
     // The valleys should will brighter for a more natural effect
-    vec3 shininess = SHININESS_COLOR * SHININESS_INTENSITY * v_displacement;
+    vec3 shininess = u_shine_intensity * v_displacement * u_shine_color;
     vec3 diffuse = mix(u_color_base, u_color_tip, v_uv.y);
-    float alpha = min(HEIGHT_TRANSPARENCY_RELATION * v_uv.y, 1.0);
+    float alpha = mix(0.0, 1.0, v_uv.y / u_transparent_proportion);
 
     // TODO: Maybe base gradient based on length(position - blade origin) rather than height
     csm_DiffuseColor = vec4(diffuse + shininess, alpha);

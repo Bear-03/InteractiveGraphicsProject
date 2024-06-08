@@ -23,6 +23,9 @@ export type MenuOptions = {
     blades: {
         baseColor: MenuOption<number>,
         tipColor: MenuOption<number>,
+        transparentProportion: MenuOption<number>,
+        shineColor: MenuOption<number>,
+        shineIntensity: MenuOption<number>,
         density: MenuOption<number>,
         width: MenuOption<number>,
         height: MenuOption<number>,
@@ -38,7 +41,7 @@ export type MenuOptions = {
     spatial: {
         strength: MenuOption<number>,
         maxDistance: MenuOption<number>,
-    }
+    },
     debug: {
         showFps: MenuOption<boolean>,
     }
@@ -56,6 +59,9 @@ export class Gui {
         blades: {
             baseColor: { value: 0x3ca334, controller: null! },
             tipColor: { value: 0x83c71e, controller: null! },
+            transparentProportion: { value: 0.2, controller: null! },
+            shineColor: { value: 0xffffff, controller: null! },
+            shineIntensity: { value: 0.2, controller: null! },
             density: { value: 200, controller: null! },
             width: { value: 0.2, controller: null! },
             height: { value: 0.5, controller: null! },
@@ -88,6 +94,9 @@ export class Gui {
         const bladeFolder = this.menu.addFolder("Grass blades");
         this.addColorOption(bladeFolder, this.options.blades.tipColor).name("Tip color");
         this.addColorOption(bladeFolder, this.options.blades.baseColor).name("Base color");
+        this.addColorOption(bladeFolder, this.options.blades.shineColor).name("Shine color");
+        this.addOption(bladeFolder, this.options.blades.shineIntensity).name("Shine intensity");
+        this.addOption(bladeFolder, this.options.blades.transparentProportion).name("Transparent proportion");
         this.addOption(bladeFolder, this.options.blades.width).name("Width");
         this.addOption(bladeFolder, this.options.blades.height).name("Height");
         this.addOption(bladeFolder, this.options.blades.density).name("Density (no. of blades per m^2)");

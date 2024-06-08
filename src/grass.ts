@@ -8,8 +8,6 @@ import grass_vs from "./shaders/grass.vs";
 import grass_fs from "./shaders/grass.fs";
 import { gui } from "./main";
 
-const FALLBACK_COLOR = 0xff00ff;
-
 type SpatialShaderRepr = {
     center: THREE.Vector3,
     radius: number,
@@ -19,6 +17,9 @@ type GrassShaderUniforms = {
     u_time: { value: number },
     u_color_base: { value: THREE.Color },
     u_color_tip: { value: THREE.Color },
+    u_transparent_proportion: { value: number },
+    u_shine_color: { value: THREE.Color },
+    u_shine_intensity: { value: number },
     u_spatials: { value: SpatialShaderRepr[] },
     u_spatials_len: { value: number },
     u_wind_strength: { value: number },
@@ -43,9 +44,7 @@ export class Ground extends THREE.Mesh implements Behaviour {
 
     constructor() {
         const geometry = new THREE.PlaneGeometry(1, 1);
-        const material = new THREE.MeshStandardMaterial({
-            color: FALLBACK_COLOR,
-        });
+        const material = new THREE.MeshStandardMaterial();
 
         super(
             geometry,
@@ -55,20 +54,23 @@ export class Ground extends THREE.Mesh implements Behaviour {
         this.groundMaterial = material;
         this.receiveShadow = true;
 
+        // some initialized inside initOptions
         this.shaderUniforms = {
             u_time: { value: 0 },
-            u_color_base: { value: new THREE.Color(FALLBACK_COLOR) },
-            u_color_tip: { value: new THREE.Color(FALLBACK_COLOR) },
+            u_color_base: { value: new THREE.Color() },
+            u_color_tip: { value: new THREE.Color() },
+            u_transparent_proportion: { value: 0 },
+            u_shine_color: { value: new THREE.Color() },
+            u_shine_intensity: { value: 0 },
             u_spatials: { value: this.getSpatialsForShader() },
             u_spatials_len: { value: spatials.length },
-            u_wind_strength: { value: 1.0 },
-            u_wind_speed: { value: 0.6 },
+            u_wind_strength: { value: 0 },
+            u_wind_speed: { value: 0 },
             u_wind_direction: { value: new THREE.Vector2() },
-            u_wind_density: { value: 0.15 },
-            u_spatial_strength: { value: 0.7 },
-            u_spatial_max_distance: { value: 0.7 },
+            u_wind_density: { value: 0 },
+            u_spatial_strength: { value: 0 },
+            u_spatial_max_distance: { value: 0 },
         };
-
 
         this.initOptions();
 
@@ -187,6 +189,15 @@ export class Ground extends THREE.Mesh implements Behaviour {
         gui.options.blades.tipColor.controller.onChange(() => this.onTipColorChange());
         this.onTipColorChange();
 
+        gui.options.blades.shineColor.controller.onChange(() => this.onShineColorChange());
+        this.onShineColorChange();
+
+        gui.options.blades.shineIntensity.controller.onChange(() => this.onShineIntensityChange());
+        this.onShineIntensityChange();
+
+        gui.options.blades.transparentProportion.controller.onChange(() => this.onBladeTransparentProportionChange());
+        this.onBladeTransparentProportionChange();
+
         gui.options.blades.width.controller.onChange(() => this.onBladeGeometryChange());
         gui.options.blades.height.controller.onChange(() => this.onBladeGeometryChange());
         gui.options.blades.density.controller.onChange(() => this.onBladeGeometryChange());
@@ -229,6 +240,18 @@ export class Ground extends THREE.Mesh implements Behaviour {
 
     onTipColorChange() {
         this.shaderUniforms.u_color_tip.value.set(gui.options.blades.tipColor.value);
+    }
+
+    onShineColorChange() {
+        this.shaderUniforms.u_shine_color.value.set(gui.options.blades.shineColor.value);
+    }
+
+    onShineIntensityChange() {
+        this.shaderUniforms.u_shine_intensity.value = gui.options.blades.shineIntensity.value;
+    }
+
+    onBladeTransparentProportionChange() {
+        this.shaderUniforms.u_transparent_proportion.value = gui.options.blades.transparentProportion.value;
     }
 
     onBladeGeometryChange() {
