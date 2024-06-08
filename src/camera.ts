@@ -15,7 +15,6 @@ export class Camera extends THREE.PerspectiveCamera implements Behaviour {
         this.controls = new OrbitControls(this, renderer.domElement);
         this.controls.listenToKeyEvents(window);
         this.controls.enableDamping = true;
-        this.controls.maxPolarAngle = Math.PI / 2 - 0.2;
     }
 
     getLookDirection(): THREE.Vector3 {

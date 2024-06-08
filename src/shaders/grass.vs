@@ -5,7 +5,7 @@
 
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
-#define MAX_TURN_ANGLE M_PI / 2.0 - 0.2
+#define MAX_TURN_ANGLE M_PI / 2.1
 
 struct Spatial {
     vec3 center;
@@ -61,7 +61,7 @@ vec3 rotate_towards(vec3 vec, vec3 target, float angle) {
 // Returns the direction and amount the vertex should move because of wind
 vec3 wind_influence(vec3 height) {
     float angle = u_wind_strength * worley(u_wind_density * a_blade_origin.xy + u_wind_speed * u_time * -u_wind_direction);
-    return rotate_towards(height, vec3(u_wind_direction, 0), min(angle, MAX_TURN_ANGLE));
+    return rotate_towards(height, vec3(u_wind_direction, 0), angle);
 }
 
 vec3 spatial_influence(vec3 height) {
@@ -87,6 +87,17 @@ vec3 spatial_influence(vec3 height) {
     return height;
 }
 
+vec3 below_ground_control(vec3 height) {
+    float angle = angle_between(height, UP);
+
+    if (angle <= MAX_TURN_ANGLE) {
+        return height;
+    }
+
+    float correction = angle - MAX_TURN_ANGLE;
+    return rotate_towards(height, UP, correction);
+}
+
 void main() {
     v_uv = uv;
     v_blade_origin = a_blade_origin;
@@ -98,6 +109,7 @@ void main() {
     vec3 new_height = height;
     new_height = spatial_influence(new_height);
     new_height = wind_influence(new_height);
+    new_height = below_ground_control(new_height);
     v_displacement = length(new_height - height) / position.z;
 
     csm_Position = vec3(position.xy, 0.0) + new_height;
