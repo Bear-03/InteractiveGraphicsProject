@@ -70,12 +70,14 @@ vec3 spatial_influence(vec3 height) {
         }
 
         Spatial spatial = u_spatials[i];
-        // Spatial position needs to have the y and z swapped because
-        // of the change in coordinate system from threejs to webgl
+
         vec3 influence_dir = a_blade_origin - spatial.center;
 
-        // Cases go from furthest to closest
-        float t = clamp(SPATIAL_INFLUENCE_STRENGTH * map_range(length(influence_dir), spatial.radius, spatial.radius + SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), 0.0, 1.0);
+        float t = clamp( //
+        SPATIAL_INFLUENCE_STRENGTH * map_range(length(influence_dir), spatial.radius, spatial.radius + SPATIAL_INFLUENCE_MAX_DISTANCE, 1.0, 0.0), //
+        0.0, //
+        1.0 //
+        );
         float angle = mix(0.0, MAX_TURN_ANGLE, t);
 
         height = rotate_towards(height, influence_dir, angle);
