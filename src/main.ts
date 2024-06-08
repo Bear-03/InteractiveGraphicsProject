@@ -64,12 +64,13 @@ function start(): void {
     const sphereLinear = new Sphere(
         sphereRadius,
         new THREE.Color(0x0000ff),
-        new LinearTrajectory(0.5,
+        new LinearTrajectory(
+            0.5,
             new THREE.Vector3(0,
                 0,
                 sphereRadius
             ),
-            new THREE.Vector3(0, 0, 4)
+            new THREE.Vector3(0, 0, 3)
         )
     );
     instantiate(sphereLinear, scene);

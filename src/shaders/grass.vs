@@ -16,7 +16,7 @@
 // How much spatial influence moves the blades
 #define SPATIAL_INFLUENCE_STRENGTH 0.7
 // How far spatial influence goes
-#define SPATIAL_INFLUENCE_MAX_DISTANCE 1.0
+#define SPATIAL_INFLUENCE_MAX_DISTANCE 0.7
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
 
