@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "three": "^0.165.0"
+    "three": "^0.165.0",
+    "three-custom-shader-material": "^5.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.1",

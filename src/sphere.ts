@@ -18,6 +18,9 @@ export class Sphere extends THREE.Mesh implements Behaviour, Spatial {
 
         this.radius = radius;
         this.trajectory = trajectory;
+
+        this.castShadow = true;
+        this.receiveShadow = true;
     }
 
     update(delta: number): void {

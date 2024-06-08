@@ -25,5 +25,7 @@
         "attribute vec3 morphTarget6;",
         "attribute vec3 morphTarget7;",
         "attribute mat4 instanceMatrix;",
+        "vec3 csm_Position;",
+        "vec4 csm_DiffuseColor;",
     ],
 }

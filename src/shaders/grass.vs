@@ -1,17 +1,17 @@
 // Based on: https://youtu.be/usdwhhZWIJ4?si=FhwX-wJgk24E05mo
 
-#define PI 3.1415926535897932384626433832795
+#define M_PI 3.1415926535897932384626433832795
 #define UP vec3(0, 0, 1)
 
 // Multiplicator of the values outputted by the noise pattern,
 // i.e. how much difference between hills and valleys of grass
 #define WIND_STRENGTH 1.0
 // How fast the noise pattern moves
-#define WIND_SPEED 0.5
+#define WIND_SPEED 0.6
  // In which direction the pattern moves
 #define WIND_DIRECTION normalize(vec2(1.0, 1.0))
 // How zoomed in the pattern is
-#define WIND_DENSITY 0.2
+#define WIND_DENSITY 0.15
 
 // How much spatial influence moves the blades
 #define SPATIAL_INFLUENCE_STRENGTH 0.7
@@ -20,7 +20,7 @@
 // Max spatial objects to handle
 #define MAX_SPATIALS 10
 
-#define MAX_TURN_ANGLE PI / 2.0
+#define MAX_TURN_ANGLE M_PI / 2.0
 
 struct Spatial {
     vec3 center;
@@ -92,13 +92,12 @@ void main() {
 
     // We could just add the offset to the vertex position
     // but that results in stretching
-    vec3 height = vec3(0.0, 0.0, position.z);
+    vec3 height = vec3(0.0, 0.0, pow(position.z, 2.0));
 
     vec3 new_height = height;
     new_height = spatial_influence(new_height);
     new_height = wind_influence(new_height, height);
     v_displacement = length(new_height - height);
 
-    vec3 new_pos = vec3(position.xy, 0.0) + new_height;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(new_pos, 1.0);
+    csm_Position = vec3(position.xy, 0.0) + new_height;
 }

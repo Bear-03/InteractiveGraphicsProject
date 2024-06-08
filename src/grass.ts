@@ -1,15 +1,15 @@
 import * as THREE from "three";
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import { Behaviour, Range, instantiate, joinShaders, spatials } from "./lib";
-import compare_s from "./shaders/lib/compare.glsl";
 import map_range_s from "./shaders/lib/map_range.glsl";
 import random_s from "./shaders/lib/random.glsl";
 import grass_vs from "./shaders/grass.vs";
 import grass_fs from "./shaders/grass.fs";
 
 const GROUND_COLOR = 0x5f5033;
-const GRASS_BASE_COLOR = 0x3d8b38;
-const GRASS_TIP_COLOR = 0x7ec53c;
+const GRASS_BASE_COLOR = 0x3ca334;
+const GRASS_TIP_COLOR = 0x83c71e;
 
 type SpatialShaderRepr = {
     center: THREE.Vector3,
@@ -17,8 +17,8 @@ type SpatialShaderRepr = {
 }
 
 type GrassShaderUniforms = {
-    u_color_bottom: { value: THREE.Color },
-    u_color_top: { value: THREE.Color },
+    u_color_base: { value: THREE.Color },
+    u_color_tip: { value: THREE.Color },
     u_time: { value: number },
     u_spatials: { value: SpatialShaderRepr[] },
     u_spatials_len: { value: number },
@@ -49,8 +49,8 @@ export class Grass extends THREE.Mesh implements Behaviour {
         )
 
         this.shaderUniforms = {
-            u_color_bottom: { value: new THREE.Color(GRASS_BASE_COLOR) },
-            u_color_top: { value: new THREE.Color(GRASS_TIP_COLOR) },
+            u_color_base: { value: new THREE.Color(GRASS_BASE_COLOR) },
+            u_color_tip: { value: new THREE.Color(GRASS_TIP_COLOR) },
             u_time: { value: 0 },
             u_spatials: { value: this.getSpatialsForShader() },
             u_spatials_len: { value: spatials.length },
@@ -89,26 +89,29 @@ export class Grass extends THREE.Mesh implements Behaviour {
         const blades = new Array(bladeCount);
 
         for (let i = 0; i < bladeCount; i++) {
-            blades[i] = this.createBladeMesh(new THREE.Vector3(
+            blades[i] = this.createBladeGeometry(new THREE.Vector3(
                 THREE.MathUtils.randFloatSpread(Grass.SIZE - Grass.MARGIN),
                 THREE.MathUtils.randFloatSpread(Grass.SIZE - Grass.MARGIN),
                 0
             ));
         }
 
-        instantiate(new THREE.Mesh(
+        const bladeMesh = new THREE.Mesh(
             BufferGeometryUtils.mergeGeometries(blades),
-            new THREE.ShaderMaterial({
+            new CustomShaderMaterial({
+                baseMaterial: THREE.MeshStandardMaterial,
                 uniforms: this.shaderUniforms,
-                vertexShader: joinShaders([compare_s, map_range_s, random_s, grass_vs]),
-                fragmentShader: joinShaders([random_s, grass_fs]),
+                vertexShader: joinShaders([map_range_s, random_s, grass_vs]),
+                fragmentShader: joinShaders([grass_fs]),
                 side: THREE.DoubleSide,
                 transparent: true,
             })
-        ), this);
+        );
+        bladeMesh.receiveShadow = true;
+        instantiate(bladeMesh, this);
     }
 
-    createBladeMesh(position: THREE.Vector3) {
+    createBladeGeometry(position: THREE.Vector3) {
         const heightMultiplier = 1 + THREE.MathUtils.randFloat(-Grass.BLADE_HEIGHT_MULTIPLIER_DEVIATION.min, Grass.BLADE_HEIGHT_MULTIPLIER_DEVIATION.max);
 
         const geom = new THREE.BufferGeometry();
