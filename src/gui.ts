@@ -29,8 +29,7 @@ export type MenuOptions = {
         density: MenuOption<number>,
         width: MenuOption<number>,
         height: MenuOption<number>,
-        minHeightMultiplier: MenuOption<number>,
-        maxHeightMultiplier: MenuOption<number>,
+        maxHeightDeviation: MenuOption<number>,
     },
     wind: {
         strength: MenuOption<number>,
@@ -61,12 +60,11 @@ export class Gui {
             tipColor: { value: 0x83c71e, controller: null! },
             transparentProportion: { value: 0.2, controller: null! },
             shineColor: { value: 0xffffff, controller: null! },
-            shineIntensity: { value: 0.2, controller: null! },
-            density: { value: 200, controller: null! },
+            shineIntensity: { value: 0.1, controller: null! },
+            density: { value: 150, controller: null! },
             width: { value: 0.2, controller: null! },
-            height: { value: 0.5, controller: null! },
-            minHeightMultiplier: { value: -0.5, controller: null! },
-            maxHeightMultiplier: { value: 0.5, controller: null! },
+            height: { value: 0.7, controller: null! },
+            maxHeightDeviation: { value: 0.2, controller: null! },
         },
         wind: {
             strength: { value: 1, controller: null! },
@@ -75,11 +73,11 @@ export class Gui {
             directionAngle: { value: 45, controller: null! },
         },
         spatial: {
-            strength: { value: 1, controller: null! },
+            strength: { value: 0.7, controller: null! },
             maxDistance: { value: 0.6, controller: null! },
         },
         debug: {
-            showFps: { value: true, controller: null! },
+            showFps: { value: false, controller: null! },
         }
     };
 
@@ -100,8 +98,7 @@ export class Gui {
         this.addOption(bladeFolder, this.options.blades.width).name("Width").min(0).max(1);
         this.addOption(bladeFolder, this.options.blades.height).name("Height").min(0).max(1.5);
         this.addOption(bladeFolder, this.options.blades.density).name("Density").min(0).max(1000);
-        this.addOption(bladeFolder, this.options.blades.minHeightMultiplier).name("Min height multiplier").min(-2).max(2);
-        this.addOption(bladeFolder, this.options.blades.maxHeightMultiplier).name("Max height multiplier").min(-2).max(2);
+        this.addOption(bladeFolder, this.options.blades.maxHeightDeviation).name("Max height deviation").min(0).max(1);
 
         const windFolder = this.menu.addFolder("Wind");
         this.addOption(windFolder, this.options.wind.strength).name("Strength").min(0).max(3);
@@ -114,9 +111,8 @@ export class Gui {
         this.addOption(spatialFolder, this.options.spatial.maxDistance).name("Max influence distance").min(0).max(5);
 
         const debugFolder = this.menu.addFolder("Debug");
-        this.addOption(debugFolder, this.options.debug.showFps).name("Show FPS").onChange((v) => {
-            this.stats.dom.style.visibility = v ? "visible" : "hidden";
-        });
+        this.addOption(debugFolder, this.options.debug.showFps).name("Show FPS").onChange(() => this.onShowFpsChange());
+        this.onShowFpsChange();
     }
 
     // Type checking is a bit broken for lil-gui
@@ -132,6 +128,10 @@ export class Gui {
         const controller = parent.add(option, "value");
         option.controller = controller;
         return controller;
+    }
+
+    onShowFpsChange() {
+        this.stats.dom.style.visibility = this.options.debug.showFps.value ? "visible" : "hidden";
     }
 
     beforeUpdate() {

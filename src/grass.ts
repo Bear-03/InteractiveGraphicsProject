@@ -33,8 +33,8 @@ type GrassShaderUniforms = {
 export class Ground extends THREE.Mesh implements Behaviour {
     // +- how much to add to the rotation on each axis
     private static BLADE_ROTATION: Range<THREE.Vector3> = {
-        min: new THREE.Vector3(-Math.PI / 4, -0.2, 0),
-        max: new THREE.Vector3(Math.PI / 4, 0.2, Math.PI)
+        min: new THREE.Vector3(-Math.PI / 8, -0.2, 0),
+        max: new THREE.Vector3(Math.PI / 8, 0.2, Math.PI)
     };
 
     private shaderUniforms: GrassShaderUniforms;
@@ -114,7 +114,7 @@ export class Ground extends THREE.Mesh implements Behaviour {
         this.shaderUniforms.u_spatials_len.value = spatials.length;
     }
 
-    createGrassGeometry(density: number, bladeSize: THREE.Vector2, heightMultiplierRange: Range<number>, groundSize: number): THREE.BufferGeometry {
+    createGrassGeometry(density: number, bladeSize: THREE.Vector2, heightDeviation: number, groundSize: number): THREE.BufferGeometry {
         const bladeCount = Math.ceil(Math.pow(groundSize, 2) * density);
         const blades = new Array(bladeCount);
 
@@ -125,21 +125,21 @@ export class Ground extends THREE.Mesh implements Behaviour {
                 0
             ),
                 bladeSize,
-                heightMultiplierRange,
+                heightDeviation,
             );
         }
 
         return BufferGeometryUtils.mergeGeometries(blades);
     }
 
-    createBladeGeometry(position: THREE.Vector3, size: THREE.Vector2, heightMultiplierRange: Range<number>) {
-        const heightMultiplier = 1 + THREE.MathUtils.randFloat(-heightMultiplierRange.min, heightMultiplierRange.max);
+    createBladeGeometry(position: THREE.Vector3, size: THREE.Vector2, heightDeviation: number) {
+        const deviation = THREE.MathUtils.randFloat(0, heightDeviation);
 
         const geom = new THREE.BufferGeometry();
 
         const vertices = new Float32Array([
             size.x / 2, 0, 0,
-            0, 0, size.y * heightMultiplier,
+            0, 0, size.y + deviation,
             -size.x / 2, 0, 0,
         ]);
         const uvs = new Float32Array([
@@ -201,8 +201,7 @@ export class Ground extends THREE.Mesh implements Behaviour {
         gui.options.blades.width.controller.onChange(() => this.onBladeGeometryChange());
         gui.options.blades.height.controller.onChange(() => this.onBladeGeometryChange());
         gui.options.blades.density.controller.onChange(() => this.onBladeGeometryChange());
-        gui.options.blades.minHeightMultiplier.controller.onChange(() => this.onBladeGeometryChange());
-        gui.options.blades.maxHeightMultiplier.controller.onChange(() => this.onBladeGeometryChange());
+        gui.options.blades.maxHeightDeviation.controller.onChange(() => this.onBladeGeometryChange());
         this.onBladeGeometryChange();
 
         gui.options.wind.strength.controller.onChange(() => this.onWindStrengthChange());
@@ -259,7 +258,7 @@ export class Ground extends THREE.Mesh implements Behaviour {
         this.grassGeometry.copy(this.createGrassGeometry(
             bladeOptions.density.value,
             new THREE.Vector2(bladeOptions.width.value, bladeOptions.height.value),
-            { min: bladeOptions.minHeightMultiplier.value, max: bladeOptions.maxHeightMultiplier.value },
+            bladeOptions.maxHeightDeviation.value,
             gui.options.ground.size.value,
         ));
     }
